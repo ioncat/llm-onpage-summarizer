@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Summarizer</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <div class="app">
+
+    <header class="header">
+      <span class="header__title">LLM Summarizer</span>
+    </header>
+
+    <section class="settings">
+      <label class="settings__label" for="model-input">Model</label>
+      <input
+        id="model-input"
+        class="settings__input"
+        type="text"
+        placeholder="llama3.2"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </section>
+
+    <div class="actions">
+      <button id="btn-summarize" class="btn btn--primary">Summarize Page</button>
+      <button id="btn-stop" class="btn btn--danger" hidden>Stop</button>
+    </div>
+
+    <div id="status" class="status" hidden></div>
+
+    <div id="result-wrap" class="result-wrap" hidden>
+      <div id="result" class="result"></div>
+      <div class="result-footer">
+        <span id="char-count" class="char-count"></span>
+        <button id="btn-copy" class="btn btn--ghost">Copy</button>
+      </div>
+    </div>
+
+    <div id="error" class="error" hidden></div>
+
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
