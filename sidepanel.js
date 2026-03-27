@@ -29,15 +29,17 @@ let activeMode = 'summarize';
 
 // --- Prompt templates ---
 
+const USER_LANG = navigator.language || 'en';
+
 const PROMPTS = {
   summarize: (text) =>
-    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases.\n\n${text}`,
+    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases. Respond in the language with code "${USER_LANG}".\n\n${text}`,
   keypoints: (text) =>
-    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list.\n\n${text}`,
+    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list. Respond in the language with code "${USER_LANG}".\n\n${text}`,
   eli5: (text) =>
-    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences.\n\n${text}`,
+    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences. Respond in the language with code "${USER_LANG}".\n\n${text}`,
   translate: (text) =>
-    `Translate the following web page content to English. Preserve the original structure.\n\n${text}`,
+    `Translate the following web page content to the language with code "${USER_LANG}". Preserve the original structure.\n\n${text}`,
 };
 
 const MODE_LABELS = {
