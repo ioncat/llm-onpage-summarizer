@@ -199,7 +199,10 @@ modelSelect.addEventListener('change', () => {
 // --- Load saved settings ---
 
 chrome.storage.local.get(['theme', 'mode', 'ollamaUrl'], ({ theme, mode, ollamaUrl }) => {
-  urlInput.value = ollamaUrl || DEFAULT_OLLAMA_URL;
+  const url = ollamaUrl || DEFAULT_OLLAMA_URL;
+  urlInput.value = url;
+  if (!ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });
+
   applyTheme(theme || getSystemTheme());
   if (mode) {
     activeMode = mode;
