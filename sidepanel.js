@@ -16,6 +16,27 @@ const charCountEl  = document.getElementById('char-count');
 const errorEl      = document.getElementById('error');
 
 let abortController = null;
+let activeMode = 'summarize';
+
+// --- Prompt templates ---
+
+const PROMPTS = {
+  summarize: (text) =>
+    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases.\n\n${text}`,
+  keypoints: (text) =>
+    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list.\n\n${text}`,
+  eli5: (text) =>
+    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences.\n\n${text}`,
+  translate: (text) =>
+    `Translate the following web page content to English. Preserve the original structure.\n\n${text}`,
+};
+
+const MODE_LABELS = {
+  summarize: 'Summarizing…',
+  keypoints: 'Extracting key points…',
+  eli5: 'Simplifying…',
+  translate: 'Translating…',
+};
 
 // --- Theme ---
 
@@ -50,6 +71,26 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 
 modelInput.addEventListener('change', () => {
   chrome.storage.local.set({ model: modelInput.value.trim() || DEFAULT_MODEL });
+});
+
+// --- Mode selector ---
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeMode = btn.dataset.mode;
+    chrome.storage.local.set({ mode: activeMode });
+  });
+});
+
+chrome.storage.local.get('mode', ({ mode }) => {
+  if (mode) {
+    activeMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+  }
 });
 
 
@@ -114,11 +155,9 @@ async function summarize() {
   }
 
   const model = modelInput.value.trim() || DEFAULT_MODEL;
-  const prompt =
-    `Summarize the following web page content in 4–6 concise bullet points. ` +
-    `Be specific, avoid filler phrases.\n\n${pageText}`;
+  const prompt = PROMPTS[activeMode](pageText);
 
-  setStatus('Generating summary…');
+  setStatus(MODE_LABELS[activeMode]);
 
   abortController = new AbortController();
 
