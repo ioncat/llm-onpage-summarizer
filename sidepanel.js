@@ -265,8 +265,33 @@ async function getPageText() {
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: () => {
-      const text = document.body?.innerText || '';
-      return text.replace(/\s+/g, ' ').trim();
+      // Try to find the main content area, ignore nav/header/footer noise
+      const candidates = [
+        'article',
+        'main',
+        '[role="main"]',
+        '.post-content', '.article-content', '.entry-content',
+        '.content', '.post', '.article',
+        '#content', '#main', '#article',
+      ];
+
+      let el = null;
+      for (const selector of candidates) {
+        const found = document.querySelector(selector);
+        if (found && found.innerText.trim().length > 200) {
+          el = found;
+          break;
+        }
+      }
+
+      // Fallback to body, but strip noisy elements first
+      if (!el) {
+        const clone = document.body.cloneNode(true);
+        clone.querySelectorAll('nav, header, footer, aside, script, style, noscript, [role="navigation"], [role="banner"], [role="complementary"]').forEach(n => n.remove());
+        return clone.innerText.replace(/\s+/g, ' ').trim();
+      }
+
+      return el.innerText.replace(/\s+/g, ' ').trim();
     },
   });
 
