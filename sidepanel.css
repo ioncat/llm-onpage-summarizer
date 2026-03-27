@@ -185,6 +185,28 @@ body {
   gap: 4px;
 }
 
+.model-row {
+  display: flex;
+  gap: 6px;
+}
+
+.settings__select {
+  appearance: none;
+  cursor: pointer;
+  flex: 1;
+}
+
+.settings__select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn--icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  padding: 6px 10px;
+}
+
 /* History panel */
 .history-panel {
   background: var(--bg-surface);

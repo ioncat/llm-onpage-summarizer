@@ -5,8 +5,9 @@ const MAX_TEXT_LENGTH = 12000;
 const DEFAULT_MODEL = 'llama3.2';
 const MAX_HISTORY = 8;
 
-const modelInput    = document.getElementById('model-input');
-const urlInput      = document.getElementById('url-input');
+const modelSelect        = document.getElementById('model-select');
+const urlInput           = document.getElementById('url-input');
+const btnRefreshModels   = document.getElementById('btn-refresh-models');
 const btnSummarize  = document.getElementById('btn-summarize');
 const btnStop       = document.getElementById('btn-stop');
 const btnCopy       = document.getElementById('btn-copy');
@@ -146,10 +147,58 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
+// --- Fetch models from Ollama ---
+
+async function fetchModels() {
+  const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
+  modelSelect.disabled = true;
+  btnRefreshModels.disabled = true;
+  btnRefreshModels.textContent = '…';
+
+  try {
+    const res = await fetch(`${baseUrl}/api/tags`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { models = [] } = await res.json();
+
+    const savedModel = await new Promise(r => chrome.storage.local.get('model', ({ model }) => r(model)));
+
+    modelSelect.innerHTML = '';
+    if (!models.length) {
+      modelSelect.innerHTML = '<option value="">No models found</option>';
+      return;
+    }
+
+    models.forEach(({ name }) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if (name === savedModel || (!savedModel && name.startsWith(DEFAULT_MODEL))) {
+        opt.selected = true;
+      }
+      modelSelect.appendChild(opt);
+    });
+
+    // fallback — select first if nothing matched
+    if (!modelSelect.value && models.length) modelSelect.value = models[0].name;
+    chrome.storage.local.set({ model: modelSelect.value });
+
+  } catch {
+    modelSelect.innerHTML = `<option value="">Cannot reach Ollama</option>`;
+  } finally {
+    modelSelect.disabled = false;
+    btnRefreshModels.disabled = false;
+    btnRefreshModels.textContent = '↻';
+  }
+}
+
+btnRefreshModels.addEventListener('click', fetchModels);
+modelSelect.addEventListener('change', () => {
+  chrome.storage.local.set({ model: modelSelect.value });
+});
+
 // --- Load saved settings ---
 
-chrome.storage.local.get(['model', 'theme', 'mode', 'ollamaUrl'], ({ model, theme, mode, ollamaUrl }) => {
-  modelInput.value = model || DEFAULT_MODEL;
+chrome.storage.local.get(['theme', 'mode', 'ollamaUrl'], ({ theme, mode, ollamaUrl }) => {
   urlInput.value = ollamaUrl || DEFAULT_OLLAMA_URL;
   applyTheme(theme || getSystemTheme());
   if (mode) {
@@ -158,10 +207,7 @@ chrome.storage.local.get(['model', 'theme', 'mode', 'ollamaUrl'], ({ model, them
       b.classList.toggle('active', b.dataset.mode === mode);
     });
   }
-});
-
-modelInput.addEventListener('change', () => {
-  chrome.storage.local.set({ model: modelInput.value.trim() || DEFAULT_MODEL });
+  fetchModels();
 });
 
 urlInput.addEventListener('change', () => {
@@ -222,7 +268,7 @@ async function run() {
     return;
   }
 
-  const model = modelInput.value.trim() || DEFAULT_MODEL;
+  const model = modelSelect.value || DEFAULT_MODEL;
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
   const ollamaUrl = `${baseUrl}/api/generate`;
   const prompt = PROMPTS[activeMode](pageText);

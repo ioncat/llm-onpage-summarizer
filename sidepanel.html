@@ -19,15 +19,13 @@
     <!-- Settings panel (collapsible) -->
     <section id="settings-panel" class="settings-panel" hidden>
       <div class="settings-row">
-        <label class="settings__label" for="model-input">Model</label>
-        <input
-          id="model-input"
-          class="settings__input"
-          type="text"
-          placeholder="llama3.2"
-          autocomplete="off"
-          spellcheck="false"
-        />
+        <label class="settings__label" for="model-select">Model</label>
+        <div class="model-row">
+          <select id="model-select" class="settings__input settings__select">
+            <option value="">Loading models…</option>
+          </select>
+          <button id="btn-refresh-models" class="btn btn--ghost btn--icon" title="Refresh models">↻</button>
+        </div>
       </div>
       <div class="settings-row">
         <label class="settings__label" for="url-input">Ollama URL</label>
