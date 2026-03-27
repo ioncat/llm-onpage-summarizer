@@ -38,6 +38,19 @@
           spellcheck="false"
         />
       </div>
+      <div class="settings-row">
+        <div class="prompt-label-row">
+          <label class="settings__label" for="prompt-editor">Prompt template</label>
+          <button id="btn-reset-prompt" class="btn btn--ghost" style="font-size:11px;padding:3px 8px;">Reset</button>
+        </div>
+        <textarea
+          id="prompt-editor"
+          class="settings__input prompt-editor"
+          placeholder="Use {{text}} as placeholder for page content"
+          spellcheck="false"
+        ></textarea>
+        <span class="settings__hint">Use <code>{{text}}</code> where page content should go</span>
+      </div>
     </section>
 
     <!-- History panel (collapsible) -->

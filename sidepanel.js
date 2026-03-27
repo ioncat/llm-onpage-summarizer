@@ -7,6 +7,8 @@ const MAX_HISTORY = 8;
 
 const modelSelect        = document.getElementById('model-select');
 const urlInput           = document.getElementById('url-input');
+const promptEditor       = document.getElementById('prompt-editor');
+const btnResetPrompt     = document.getElementById('btn-reset-prompt');
 const btnRefreshModels   = document.getElementById('btn-refresh-models');
 const btnSummarize  = document.getElementById('btn-summarize');
 const btnStop       = document.getElementById('btn-stop');
@@ -40,27 +42,16 @@ const USER_LANG = (() => {
 
 const SYSTEM_PROMPT = `You are a helpful assistant. You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.`;
 
-const PROMPTS = {
-  summarize: (text) =>
-    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases.\n\n${text}`,
-  keypoints: (text) =>
-    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list.\n\n${text}`,
-  eli5: (text) =>
-    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences.\n\n${text}`,
-  translate: (text) =>
-    `Translate the following web page content to ${USER_LANG}. Preserve the original structure. Output only the translation.\n\n${text}`,
+const DEFAULT_PROMPTS = {
+  summarize: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}`,
+  keypoints: `Extract 5–8 key points from the following web page as a numbered list in ${USER_LANG}.\n\n{{text}}`,
+  eli5:      `Explain the following web page as if I'm 5 years old. Use simple words. Respond in ${USER_LANG}.\n\n{{text}}`,
+  translate: `Translate the following web page content to ${USER_LANG}. Output only the translation.\n\n{{text}}`,
 };
 
-// Prefill: start assistant response in target language to force continuation in that language
-const PREFILL = {
-  summarize: { 'Russian': '• ', 'Ukrainian': '• ', 'German': '• ', 'French': '• ', 'Spanish': '• ', 'Chinese': '• ', 'Japanese': '• ' },
-  keypoints: { 'Russian': '1. ', 'Ukrainian': '1. ', 'German': '1. ', 'French': '1. ', 'Spanish': '1. ' },
-  eli5:      { 'Russian': 'Если объяснять просто: ', 'Ukrainian': 'Якщо пояснити просто: ', 'German': 'Einfach erklärt: ', 'French': 'En termes simples: ', 'Spanish': 'En términos simples: ' },
-  translate: {},
-};
-
-function getPrefill(mode) {
-  return PREFILL[mode]?.[USER_LANG] ?? '';
+function buildPrompt(mode, pageText) {
+  const template = promptEditor.value.trim() || DEFAULT_PROMPTS[mode];
+  return template.replace('{{text}}', pageText);
 }
 
 const MODE_LABELS = {
@@ -159,6 +150,23 @@ btnClearHist.addEventListener('click', () => {
   renderHistory();
 });
 
+// --- Prompt editor ---
+
+function loadPromptForMode(mode) {
+  chrome.storage.local.get(`prompt_${mode}`, (data) => {
+    promptEditor.value = data[`prompt_${mode}`] || DEFAULT_PROMPTS[mode];
+  });
+}
+
+promptEditor.addEventListener('change', () => {
+  chrome.storage.local.set({ [`prompt_${activeMode}`]: promptEditor.value });
+});
+
+btnResetPrompt.addEventListener('click', () => {
+  promptEditor.value = DEFAULT_PROMPTS[activeMode];
+  chrome.storage.local.remove(`prompt_${activeMode}`);
+});
+
 // --- Mode selector ---
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -167,6 +175,7 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.classList.add('active');
     activeMode = btn.dataset.mode;
     chrome.storage.local.set({ mode: activeMode });
+    loadPromptForMode(activeMode);
   });
 });
 
@@ -233,6 +242,7 @@ chrome.storage.local.get(['theme', 'mode', 'ollamaUrl'], ({ theme, mode, ollamaU
       b.classList.toggle('active', b.dataset.mode === mode);
     });
   }
+  loadPromptForMode(activeMode);
   fetchModels();
 });
 
@@ -334,7 +344,7 @@ async function run() {
   const model = modelSelect.value || DEFAULT_MODEL;
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
   const ollamaUrl = `${baseUrl}/api/chat`;
-  const prompt = PROMPTS[activeMode](pageText);
+  const prompt = buildPrompt(activeMode, pageText);
   abortController = new AbortController();
   let fullText = '';
 
@@ -346,9 +356,8 @@ async function run() {
         model,
         stream: true,
         messages: [
-          { role: 'system',    content: SYSTEM_PROMPT },
-          { role: 'user',      content: prompt },
-          { role: 'assistant', content: getPrefill(activeMode) },
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: prompt },
         ],
       }),
       signal: abortController.signal,
@@ -361,9 +370,6 @@ async function run() {
 
     setStatus('');
     resultWrap.hidden = false;
-    fullText = getPrefill(activeMode); // show prefill immediately
-    resultEl.textContent = fullText;
-
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 

@@ -185,6 +185,32 @@ body {
   gap: 4px;
 }
 
+.prompt-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prompt-editor {
+  min-height: 120px;
+  resize: vertical;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+.settings__hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.settings__hint code {
+  background: var(--bg-input);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: monospace;
+}
+
 .model-row {
   display: flex;
   gap: 6px;
