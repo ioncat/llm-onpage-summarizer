@@ -11,19 +11,44 @@
 
     <header class="header">
       <span class="header__title">LLM Summarizer</span>
+      <button id="btn-history" class="btn btn--theme" title="History">⏱</button>
+      <button id="btn-settings" class="btn btn--theme" title="Settings">⚙</button>
       <button id="btn-theme" class="btn btn--theme" title="Toggle theme">☀</button>
     </header>
 
-    <section class="settings">
-      <label class="settings__label" for="model-input">Model</label>
-      <input
-        id="model-input"
-        class="settings__input"
-        type="text"
-        placeholder="llama3.2"
-        autocomplete="off"
-        spellcheck="false"
-      />
+    <!-- Settings panel (collapsible) -->
+    <section id="settings-panel" class="settings-panel" hidden>
+      <div class="settings-row">
+        <label class="settings__label" for="model-input">Model</label>
+        <input
+          id="model-input"
+          class="settings__input"
+          type="text"
+          placeholder="llama3.2"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <div class="settings-row">
+        <label class="settings__label" for="url-input">Ollama URL</label>
+        <input
+          id="url-input"
+          class="settings__input"
+          type="text"
+          placeholder="http://localhost:11434"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+    </section>
+
+    <!-- History panel (collapsible) -->
+    <section id="history-panel" class="history-panel" hidden>
+      <div class="history-header">
+        <span class="settings__label">Recent summaries</span>
+        <button id="btn-clear-history" class="btn btn--ghost">Clear</button>
+      </div>
+      <div id="history-list" class="history-list"></div>
     </section>
 
     <div class="modes">

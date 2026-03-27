@@ -1,19 +1,27 @@
 'use strict';
 
-const OLLAMA_URL = 'http://localhost:11434/api/generate';
+const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
 const MAX_TEXT_LENGTH = 12000;
 const DEFAULT_MODEL = 'llama3.2';
+const MAX_HISTORY = 8;
 
-const modelInput   = document.getElementById('model-input');
-const btnSummarize = document.getElementById('btn-summarize');
-const btnStop      = document.getElementById('btn-stop');
-const btnCopy      = document.getElementById('btn-copy');
-const btnTheme     = document.getElementById('btn-theme');
-const statusEl     = document.getElementById('status');
-const resultWrap   = document.getElementById('result-wrap');
-const resultEl     = document.getElementById('result');
-const charCountEl  = document.getElementById('char-count');
-const errorEl      = document.getElementById('error');
+const modelInput    = document.getElementById('model-input');
+const urlInput      = document.getElementById('url-input');
+const btnSummarize  = document.getElementById('btn-summarize');
+const btnStop       = document.getElementById('btn-stop');
+const btnCopy       = document.getElementById('btn-copy');
+const btnTheme      = document.getElementById('btn-theme');
+const btnSettings   = document.getElementById('btn-settings');
+const btnHistory    = document.getElementById('btn-history');
+const btnClearHist  = document.getElementById('btn-clear-history');
+const settingsPanel = document.getElementById('settings-panel');
+const historyPanel  = document.getElementById('history-panel');
+const historyList   = document.getElementById('history-list');
+const statusEl      = document.getElementById('status');
+const resultWrap    = document.getElementById('result-wrap');
+const resultEl      = document.getElementById('result');
+const charCountEl   = document.getElementById('char-count');
+const errorEl       = document.getElementById('error');
 
 let abortController = null;
 let activeMode = 'summarize';
@@ -50,11 +58,6 @@ function getSystemTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-chrome.storage.local.get(['model', 'theme'], ({ model, theme }) => {
-  modelInput.value = model || DEFAULT_MODEL;
-  applyTheme(theme || getSystemTheme());
-});
-
 btnTheme.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
@@ -62,15 +65,74 @@ btnTheme.addEventListener('click', () => {
   chrome.storage.local.set({ theme: next });
 });
 
-// Follow system changes when no manual override is saved
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
   chrome.storage.local.get('theme', ({ theme }) => {
     if (!theme) applyTheme(e.matches ? 'dark' : 'light');
   });
 });
 
-modelInput.addEventListener('change', () => {
-  chrome.storage.local.set({ model: modelInput.value.trim() || DEFAULT_MODEL });
+// --- Settings panel toggle ---
+
+btnSettings.addEventListener('click', () => {
+  const open = !settingsPanel.hidden;
+  settingsPanel.hidden = open;
+  if (!open) historyPanel.hidden = true;
+  btnSettings.style.color = open ? '' : 'var(--accent)';
+});
+
+// --- History panel toggle ---
+
+btnHistory.addEventListener('click', () => {
+  const open = !historyPanel.hidden;
+  historyPanel.hidden = open;
+  if (!open) settingsPanel.hidden = true;
+  btnHistory.style.color = open ? '' : 'var(--accent)';
+  if (!open) renderHistory();
+});
+
+// --- History ---
+
+function renderHistory() {
+  chrome.storage.local.get('history', ({ history = [] }) => {
+    if (!history.length) {
+      historyList.innerHTML = '<div style="padding:12px;color:var(--text-muted);font-size:12px;">No history yet.</div>';
+      return;
+    }
+    historyList.innerHTML = '';
+    history.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'history-item';
+      el.innerHTML = `
+        <div class="history-item__meta">${item.mode} · ${item.date}</div>
+        <div class="history-item__preview">${item.text}</div>
+      `;
+      el.addEventListener('click', () => {
+        resultEl.textContent = item.text;
+        charCountEl.textContent = `${item.text.length} chars`;
+        resultWrap.hidden = false;
+        historyPanel.hidden = true;
+        btnHistory.style.color = '';
+      });
+      historyList.appendChild(el);
+    });
+  });
+}
+
+function saveToHistory(text) {
+  chrome.storage.local.get('history', ({ history = [] }) => {
+    const entry = {
+      text,
+      mode: activeMode,
+      date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    };
+    const updated = [entry, ...history].slice(0, MAX_HISTORY);
+    chrome.storage.local.set({ history: updated });
+  });
+}
+
+btnClearHist.addEventListener('click', () => {
+  chrome.storage.local.set({ history: [] });
+  renderHistory();
 });
 
 // --- Mode selector ---
@@ -84,7 +146,12 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
-chrome.storage.local.get('mode', ({ mode }) => {
+// --- Load saved settings ---
+
+chrome.storage.local.get(['model', 'theme', 'mode', 'ollamaUrl'], ({ model, theme, mode, ollamaUrl }) => {
+  modelInput.value = model || DEFAULT_MODEL;
+  urlInput.value = ollamaUrl || DEFAULT_OLLAMA_URL;
+  applyTheme(theme || getSystemTheme());
   if (mode) {
     activeMode = mode;
     document.querySelectorAll('.mode-btn').forEach(b => {
@@ -93,6 +160,13 @@ chrome.storage.local.get('mode', ({ mode }) => {
   }
 });
 
+modelInput.addEventListener('change', () => {
+  chrome.storage.local.set({ model: modelInput.value.trim() || DEFAULT_MODEL });
+});
+
+urlInput.addEventListener('change', () => {
+  chrome.storage.local.set({ ollamaUrl: urlInput.value.trim() || DEFAULT_OLLAMA_URL });
+});
 
 // --- Helpers ---
 
@@ -104,12 +178,6 @@ function setStatus(text) {
 function setError(text) {
   errorEl.textContent = text;
   errorEl.hidden = !text;
-}
-
-function showResult(text) {
-  resultEl.textContent = text;
-  charCountEl.textContent = `${text.length} chars`;
-  resultWrap.hidden = false;
 }
 
 function setGenerating(active) {
@@ -137,7 +205,7 @@ async function getPageText() {
 
 // --- Ollama streaming ---
 
-async function summarize() {
+async function run() {
   setError('');
   setStatus('Extracting page text…');
   resultWrap.hidden = true;
@@ -155,16 +223,16 @@ async function summarize() {
   }
 
   const model = modelInput.value.trim() || DEFAULT_MODEL;
+  const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
+  const ollamaUrl = `${baseUrl}/api/generate`;
   const prompt = PROMPTS[activeMode](pageText);
 
   setStatus(MODE_LABELS[activeMode]);
-
   abortController = new AbortController();
-
   let fullText = '';
 
   try {
-    const response = await fetch(OLLAMA_URL, {
+    const response = await fetch(ollamaUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model, prompt, stream: true }),
@@ -177,7 +245,7 @@ async function summarize() {
     }
 
     setStatus('');
-    showResult('');
+    resultWrap.hidden = false;
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -203,10 +271,13 @@ async function summarize() {
       }
     }
 
+    if (fullText) saveToHistory(fullText);
+
   } catch (err) {
     if (err.name === 'AbortError') {
       setStatus('Stopped.');
       setTimeout(() => setStatus(''), 1500);
+      if (fullText) saveToHistory(fullText);
     } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
       setError(
         'Cannot connect to Ollama.\n\n' +
@@ -226,7 +297,7 @@ async function summarize() {
 
 // --- Events ---
 
-btnSummarize.addEventListener('click', summarize);
+btnSummarize.addEventListener('click', run);
 
 btnStop.addEventListener('click', () => {
   abortController?.abort();
