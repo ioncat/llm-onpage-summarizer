@@ -13,7 +13,8 @@ const btnRefreshModels   = document.getElementById('btn-refresh-models');
 const btnSummarize  = document.getElementById('btn-summarize');
 const btnStop       = document.getElementById('btn-stop');
 const btnCopy       = document.getElementById('btn-copy');
-const btnClear      = document.getElementById('btn-clear');
+const btnClear        = document.getElementById('btn-clear');
+const markdownToggle  = document.getElementById('markdown-toggle');
 const btnTheme      = document.getElementById('btn-theme');
 const btnSettings   = document.getElementById('btn-settings');
 const btnHistory    = document.getElementById('btn-history');
@@ -41,7 +42,12 @@ const USER_LANG = (() => {
   }
 })();
 
-const SYSTEM_PROMPT = `You are a helpful assistant. You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.`;
+function getSystemPrompt() {
+  const md = markdownToggle?.checked
+    ? ' Format your response using Markdown (headers, bold, bullet lists where appropriate).'
+    : '';
+  return `You are a helpful assistant. You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.${md}`;
+}
 
 const DEFAULT_PROMPTS = {
   summarize: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}`,
@@ -53,6 +59,60 @@ const DEFAULT_PROMPTS = {
 function buildPrompt(mode, pageText) {
   const template = promptEditor.value.trim() || DEFAULT_PROMPTS[mode];
   return template.replace('{{text}}', pageText);
+}
+
+// --- Markdown parser ---
+
+function parseMarkdown(md) {
+  const escape = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = s => s
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+
+  const lines = md.split('\n');
+  let html = '', inUl = false, inOl = false;
+
+  const closeLists = () => {
+    if (inUl) { html += '</ul>'; inUl = false; }
+    if (inOl) { html += '</ol>'; inOl = false; }
+  };
+
+  for (const raw of lines) {
+    const line = inline(escape(raw));
+
+    if (/^### /.test(line))      { closeLists(); html += `<h3>${line.slice(4)}</h3>`; continue; }
+    if (/^## /.test(line))       { closeLists(); html += `<h2>${line.slice(3)}</h2>`; continue; }
+    if (/^# /.test(line))        { closeLists(); html += `<h1>${line.slice(2)}</h1>`; continue; }
+    if (/^---+$/.test(raw.trim())){ closeLists(); html += '<hr>'; continue; }
+
+    if (/^[-*•] /.test(raw)) {
+      if (!inUl) { closeLists(); html += '<ul>'; inUl = true; }
+      html += `<li>${inline(escape(raw.replace(/^[-*•] /, '')))}</li>`;
+      continue;
+    }
+    if (/^\d+\. /.test(raw)) {
+      if (!inOl) { closeLists(); html += '<ol>'; inOl = true; }
+      html += `<li>${inline(escape(raw.replace(/^\d+\. /, '')))}</li>`;
+      continue;
+    }
+
+    closeLists();
+    if (!raw.trim()) { html += '<br>'; continue; }
+    html += `<p>${line}</p>`;
+  }
+
+  closeLists();
+  return html;
+}
+
+function renderResult(text) {
+  if (markdownToggle.checked) {
+    resultEl.innerHTML = parseMarkdown(text);
+  } else {
+    resultEl.textContent = text;
+  }
 }
 
 const MODE_LABELS = {
@@ -164,6 +224,10 @@ promptEditor.addEventListener('change', () => {
   chrome.storage.local.set({ [`prompt_${activeMode}`]: promptEditor.value });
 });
 
+markdownToggle.addEventListener('change', () => {
+  chrome.storage.local.set({ markdown: markdownToggle.checked });
+});
+
 btnResetPrompt.addEventListener('click', () => {
   promptEditor.value = DEFAULT_PROMPTS[activeMode];
   chrome.storage.local.remove(`prompt_${activeMode}`);
@@ -232,7 +296,8 @@ modelSelect.addEventListener('change', () => {
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'mode', 'ollamaUrl'], ({ theme, mode, ollamaUrl }) => {
+chrome.storage.local.get(['theme', 'mode', 'ollamaUrl', 'markdown'], ({ theme, mode, ollamaUrl, markdown }) => {
+    markdownToggle.checked = !!markdown;
   const url = ollamaUrl || DEFAULT_OLLAMA_URL;
   urlInput.value = url;
   if (!ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });
@@ -358,7 +423,7 @@ async function run() {
         model,
         stream: true,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: getSystemPrompt() },
           { role: 'user',   content: prompt },
         ],
       }),
@@ -387,7 +452,7 @@ async function run() {
           const token = json.message?.content ?? json.response ?? '';
           if (token) {
             fullText += token;
-            resultEl.textContent = fullText;
+            renderResult(fullText);
             charCountEl.textContent = `${fullText.length} chars`;
             resultEl.scrollTop = resultEl.scrollHeight;
           }
