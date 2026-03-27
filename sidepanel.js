@@ -231,9 +231,22 @@ function setError(text) {
   errorEl.hidden = !text;
 }
 
+const MODE_BTN_LABELS = {
+  summarize: 'Summarizing…',
+  keypoints: 'Extracting…',
+  eli5: 'Simplifying…',
+  translate: 'Translating…',
+};
+
 function setGenerating(active) {
-  btnSummarize.disabled = active;
   btnStop.hidden = !active;
+  if (active) {
+    btnSummarize.disabled = true;
+    btnSummarize.innerHTML = `<span class="btn-spinner"></span>${MODE_BTN_LABELS[activeMode]}`;
+  } else {
+    btnSummarize.disabled = false;
+    btnSummarize.textContent = 'Run';
+  }
 }
 
 // --- Extract page text ---
@@ -258,7 +271,7 @@ async function getPageText() {
 
 async function run() {
   setError('');
-  setStatus('Extracting page text…');
+  setStatus('');
   resultWrap.hidden = true;
   resultEl.textContent = '';
   setGenerating(true);
@@ -267,7 +280,6 @@ async function run() {
   try {
     pageText = await getPageText();
   } catch (err) {
-    setStatus('');
     setError(`Failed to read page: ${err.message}`);
     setGenerating(false);
     return;
@@ -277,8 +289,6 @@ async function run() {
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
   const ollamaUrl = `${baseUrl}/api/generate`;
   const prompt = PROMPTS[activeMode](pageText);
-
-  setStatus(MODE_LABELS[activeMode]);
   abortController = new AbortController();
   let fullText = '';
 
