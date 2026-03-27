@@ -38,13 +38,15 @@ const USER_LANG = (() => {
   }
 })();
 
+const SYSTEM_PROMPT = `You are a helpful assistant. You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.`;
+
 const PROMPTS = {
   summarize: (text) =>
-    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases. You MUST respond entirely in ${USER_LANG}, regardless of the page language.\n\n${text}`,
+    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases.\n\n${text}`,
   keypoints: (text) =>
-    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list. You MUST respond entirely in ${USER_LANG}, regardless of the page language.\n\n${text}`,
+    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list.\n\n${text}`,
   eli5: (text) =>
-    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences. You MUST respond entirely in ${USER_LANG}, regardless of the page language.\n\n${text}`,
+    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences.\n\n${text}`,
   translate: (text) =>
     `Translate the following web page content to ${USER_LANG}. Preserve the original structure. Output only the translation.\n\n${text}`,
 };
@@ -328,7 +330,7 @@ async function run() {
     const response = await fetch(ollamaUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, prompt, stream: true }),
+      body: JSON.stringify({ model, system: SYSTEM_PROMPT, prompt, stream: true }),
       signal: abortController.signal,
     });
 
