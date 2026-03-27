@@ -89,6 +89,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 // --- Settings panel toggle ---
 
 btnSettings.addEventListener('click', () => {
+  console.log('[settings] clicked, hidden=', settingsPanel.hidden);
   const open = !settingsPanel.hidden;
   settingsPanel.hidden = open;
   if (!open) historyPanel.hidden = true;
