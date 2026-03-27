@@ -19,6 +19,30 @@
     <!-- Settings panel (collapsible) -->
     <section id="settings-panel" class="settings-panel" hidden>
       <div class="settings-row">
+        <label class="settings__label" for="slot-name-input">Tab name</label>
+        <div class="model-row">
+          <input
+            id="slot-name-input"
+            class="settings__input"
+            type="text"
+            maxlength="24"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="btn-delete-slot" class="btn btn--danger-soft btn--icon" title="Delete this tab">✕</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <label class="settings__label" for="prompt-editor">Prompt template</label>
+        <textarea
+          id="prompt-editor"
+          class="settings__input prompt-editor"
+          placeholder="Use {{text}} as placeholder for page content"
+          spellcheck="false"
+        ></textarea>
+        <span class="settings__hint">Use <code>{{text}}</code> where page content should go</span>
+      </div>
+      <div class="settings-row">
         <label class="settings__label" for="model-select">Model</label>
         <div class="model-row">
           <select id="model-select" class="settings__input settings__select">
@@ -38,19 +62,6 @@
           spellcheck="false"
         />
       </div>
-      <div class="settings-row">
-        <div class="prompt-label-row">
-          <label class="settings__label" for="prompt-editor">Prompt template</label>
-          <button id="btn-reset-prompt" class="btn btn--ghost" style="font-size:11px;padding:3px 8px;">Reset</button>
-        </div>
-        <textarea
-          id="prompt-editor"
-          class="settings__input prompt-editor"
-          placeholder="Use {{text}} as placeholder for page content"
-          spellcheck="false"
-        ></textarea>
-        <span class="settings__hint">Use <code>{{text}}</code> where page content should go</span>
-      </div>
       <label class="settings__toggle">
         <input type="checkbox" id="markdown-toggle" />
         <span>Render Markdown in result</span>
@@ -66,12 +77,8 @@
       <div id="history-list" class="history-list"></div>
     </section>
 
-    <div class="modes">
-      <button class="mode-btn active" data-mode="summarize">Summarize</button>
-      <button class="mode-btn" data-mode="keypoints">Key Points</button>
-      <button class="mode-btn" data-mode="eli5">ELI5</button>
-      <button class="mode-btn" data-mode="translate">Translate</button>
-    </div>
+    <!-- Dynamic slot tabs — rendered by JS -->
+    <div class="modes" id="modes-container"></div>
 
     <div class="actions">
       <button id="btn-summarize" class="btn btn--primary">Run</button>
@@ -85,8 +92,8 @@
       <div class="result-footer">
         <span id="char-count" class="char-count"></span>
         <div style="display:flex;gap:6px;">
-          <button id="btn-copy" class="btn btn--ghost">Copy</button>
-          <button id="btn-clear" class="btn btn--ghost">Clear</button>
+          <button id="btn-clear" class="btn btn--danger-soft">Clear</button>
+          <button id="btn-copy" class="btn btn--accent-soft">Copy</button>
         </div>
       </div>
     </div>

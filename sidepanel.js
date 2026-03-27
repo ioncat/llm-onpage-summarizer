@@ -4,34 +4,40 @@ const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
 const MAX_TEXT_LENGTH = 12000;
 const DEFAULT_MODEL = 'llama3.2';
 const MAX_HISTORY = 8;
+const MAX_SLOTS = 6;
 
-const modelSelect        = document.getElementById('model-select');
-const urlInput           = document.getElementById('url-input');
-const promptEditor       = document.getElementById('prompt-editor');
-const btnResetPrompt     = document.getElementById('btn-reset-prompt');
-const btnRefreshModels   = document.getElementById('btn-refresh-models');
-const btnSummarize  = document.getElementById('btn-summarize');
-const btnStop       = document.getElementById('btn-stop');
-const btnCopy       = document.getElementById('btn-copy');
-const btnClear        = document.getElementById('btn-clear');
-const markdownToggle  = document.getElementById('markdown-toggle');
-const btnTheme      = document.getElementById('btn-theme');
-const btnSettings   = document.getElementById('btn-settings');
-const btnHistory    = document.getElementById('btn-history');
-const btnClearHist  = document.getElementById('btn-clear-history');
-const settingsPanel = document.getElementById('settings-panel');
-const historyPanel  = document.getElementById('history-panel');
-const historyList   = document.getElementById('history-list');
-const statusEl      = document.getElementById('status');
-const resultWrap    = document.getElementById('result-wrap');
-const resultEl      = document.getElementById('result');
-const charCountEl   = document.getElementById('char-count');
-const errorEl       = document.getElementById('error');
+// --- DOM refs ---
+
+const modelSelect       = document.getElementById('model-select');
+const urlInput          = document.getElementById('url-input');
+const promptEditor      = document.getElementById('prompt-editor');
+const slotNameInput     = document.getElementById('slot-name-input');
+const btnDeleteSlot     = document.getElementById('btn-delete-slot');
+const btnRefreshModels  = document.getElementById('btn-refresh-models');
+const btnSummarize      = document.getElementById('btn-summarize');
+const btnStop           = document.getElementById('btn-stop');
+const btnCopy           = document.getElementById('btn-copy');
+const btnClear          = document.getElementById('btn-clear');
+const markdownToggle    = document.getElementById('markdown-toggle');
+const btnTheme          = document.getElementById('btn-theme');
+const btnSettings       = document.getElementById('btn-settings');
+const btnHistory        = document.getElementById('btn-history');
+const btnClearHist      = document.getElementById('btn-clear-history');
+const settingsPanel     = document.getElementById('settings-panel');
+const historyPanel      = document.getElementById('history-panel');
+const historyList       = document.getElementById('history-list');
+const modesContainer    = document.getElementById('modes-container');
+const statusEl          = document.getElementById('status');
+const resultWrap        = document.getElementById('result-wrap');
+const resultEl          = document.getElementById('result');
+const charCountEl       = document.getElementById('char-count');
+const errorEl           = document.getElementById('error');
 
 let abortController = null;
-let activeMode = 'summarize';
+let slots = [];
+let activeSlotId = null;
 
-// --- Prompt templates ---
+// --- Language detection ---
 
 const USER_LANG_CODE = (navigator.language || 'en').split('-')[0];
 const USER_LANG = (() => {
@@ -42,6 +48,14 @@ const USER_LANG = (() => {
   }
 })();
 
+// --- Default slots ---
+
+const DEFAULT_SLOTS = [
+  { id: 'slot_1', name: 'Summarize', prompt: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}` },
+];
+
+// --- System prompt ---
+
 function getSystemPrompt() {
   const md = markdownToggle?.checked
     ? ' Format your response using Markdown (headers, bold, bullet lists where appropriate).'
@@ -49,15 +63,75 @@ function getSystemPrompt() {
   return `You are a helpful assistant. You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.${md}`;
 }
 
-const DEFAULT_PROMPTS = {
-  summarize: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}`,
-  keypoints: `Extract 5–8 key points from the following web page as a numbered list in ${USER_LANG}.\n\n{{text}}`,
-  eli5:      `Explain the following web page as if I'm 5 years old. Use simple words. Respond in ${USER_LANG}.\n\n{{text}}`,
-  translate: `Translate the following web page content to ${USER_LANG}. Output only the translation.\n\n{{text}}`,
-};
+// --- Slot management ---
 
-function buildPrompt(mode, pageText) {
-  const template = promptEditor.value.trim() || DEFAULT_PROMPTS[mode];
+function renderSlots() {
+  modesContainer.innerHTML = '';
+
+  slots.forEach(slot => {
+    const btn = document.createElement('button');
+    btn.className = 'mode-btn' + (slot.id === activeSlotId ? ' active' : '');
+    btn.textContent = slot.name;
+    btn.addEventListener('click', () => setActiveSlot(slot.id));
+    modesContainer.appendChild(btn);
+  });
+
+  if (slots.length < MAX_SLOTS) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'mode-btn mode-btn--add';
+    addBtn.textContent = '+';
+    addBtn.title = 'Add prompt tab';
+    addBtn.addEventListener('click', addSlot);
+    modesContainer.appendChild(addBtn);
+  }
+}
+
+function setActiveSlot(id) {
+  activeSlotId = id;
+  const slot = slots.find(s => s.id === id);
+  if (!slot) return;
+
+  promptEditor.value = slot.prompt;
+  slotNameInput.value = slot.name;
+  btnDeleteSlot.disabled = slots.length <= 1;
+
+  renderSlots();
+  chrome.storage.local.set({ activeSlotId });
+}
+
+function saveSlots() {
+  chrome.storage.local.set({ slots, activeSlotId });
+}
+
+function addSlot() {
+  const n = slots.length + 1;
+  const slot = { id: `slot_${Date.now()}`, name: `Custom ${n}`, prompt: `{{text}}` };
+  slots.push(slot);
+  setActiveSlot(slot.id);
+  saveSlots();
+  // Open settings so user can immediately name + write the prompt
+  settingsPanel.hidden = false;
+  historyPanel.hidden = true;
+  btnSettings.style.color = 'var(--accent)';
+  btnHistory.style.color = '';
+  slotNameInput.focus();
+  slotNameInput.select();
+}
+
+function deleteActiveSlot() {
+  if (slots.length <= 1) return;
+  const idx = slots.findIndex(s => s.id === activeSlotId);
+  slots.splice(idx, 1);
+  const next = slots[Math.min(idx, slots.length - 1)];
+  setActiveSlot(next.id);
+  saveSlots();
+}
+
+// --- Prompt helpers ---
+
+function buildPrompt(pageText) {
+  const slot = slots.find(s => s.id === activeSlotId);
+  const template = slot?.prompt || '{{text}}';
   return template.replace('{{text}}', pageText);
 }
 
@@ -82,10 +156,10 @@ function parseMarkdown(md) {
   for (const raw of lines) {
     const line = inline(escape(raw));
 
-    if (/^### /.test(line))      { closeLists(); html += `<h3>${line.slice(4)}</h3>`; continue; }
-    if (/^## /.test(line))       { closeLists(); html += `<h2>${line.slice(3)}</h2>`; continue; }
-    if (/^# /.test(line))        { closeLists(); html += `<h1>${line.slice(2)}</h1>`; continue; }
-    if (/^---+$/.test(raw.trim())){ closeLists(); html += '<hr>'; continue; }
+    if (/^### /.test(line))       { closeLists(); html += `<h3>${line.slice(4)}</h3>`; continue; }
+    if (/^## /.test(line))        { closeLists(); html += `<h2>${line.slice(3)}</h2>`; continue; }
+    if (/^# /.test(line))         { closeLists(); html += `<h1>${line.slice(2)}</h1>`; continue; }
+    if (/^---+$/.test(raw.trim())) { closeLists(); html += '<hr>'; continue; }
 
     if (/^[-*•] /.test(raw)) {
       if (!inUl) { closeLists(); html += '<ul>'; inUl = true; }
@@ -115,13 +189,6 @@ function renderResult(text) {
   }
 }
 
-const MODE_LABELS = {
-  summarize: 'Summarizing…',
-  keypoints: 'Extracting key points…',
-  eli5: 'Simplifying…',
-  translate: 'Translating…',
-};
-
 // --- Theme ---
 
 function applyTheme(theme) {
@@ -150,11 +217,12 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 // --- Settings panel toggle ---
 
 btnSettings.addEventListener('click', () => {
-  console.log('[settings] clicked, hidden=', settingsPanel.hidden);
   const open = !settingsPanel.hidden;
   settingsPanel.hidden = open;
   if (!open) historyPanel.hidden = true;
   btnSettings.style.color = open ? '' : 'var(--accent)';
+  btnHistory.style.color = '';
+  chrome.storage.local.set({ settingsOpen: !open });
 });
 
 // --- History panel toggle ---
@@ -164,6 +232,7 @@ btnHistory.addEventListener('click', () => {
   historyPanel.hidden = open;
   if (!open) settingsPanel.hidden = true;
   btnHistory.style.color = open ? '' : 'var(--accent)';
+  btnSettings.style.color = '';
   if (!open) renderHistory();
 });
 
@@ -176,7 +245,7 @@ function renderHistory() {
       return;
     }
     historyList.innerHTML = '';
-    history.forEach((item, i) => {
+    history.forEach(item => {
       const el = document.createElement('div');
       el.className = 'history-item';
       el.innerHTML = `
@@ -196,10 +265,11 @@ function renderHistory() {
 }
 
 function saveToHistory(text) {
+  const slotName = slots.find(s => s.id === activeSlotId)?.name || 'Custom';
   chrome.storage.local.get('history', ({ history = [] }) => {
     const entry = {
       text,
-      mode: activeMode,
+      mode: slotName,
       date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
     };
     const updated = [entry, ...history].slice(0, MAX_HISTORY);
@@ -212,38 +282,28 @@ btnClearHist.addEventListener('click', () => {
   renderHistory();
 });
 
-// --- Prompt editor ---
+// --- Slot name + prompt editing ---
 
-function loadPromptForMode(mode) {
-  chrome.storage.local.get(`prompt_${mode}`, (data) => {
-    promptEditor.value = data[`prompt_${mode}`] || DEFAULT_PROMPTS[mode];
-  });
-}
+slotNameInput.addEventListener('input', () => {
+  const slot = slots.find(s => s.id === activeSlotId);
+  if (!slot) return;
+  slot.name = slotNameInput.value.trim() || 'Custom';
+  renderSlots();
+  saveSlots();
+});
 
 promptEditor.addEventListener('change', () => {
-  chrome.storage.local.set({ [`prompt_${activeMode}`]: promptEditor.value });
+  const slot = slots.find(s => s.id === activeSlotId);
+  if (!slot) return;
+  slot.prompt = promptEditor.value;
+  saveSlots();
 });
 
 markdownToggle.addEventListener('change', () => {
   chrome.storage.local.set({ markdown: markdownToggle.checked });
 });
 
-btnResetPrompt.addEventListener('click', () => {
-  promptEditor.value = DEFAULT_PROMPTS[activeMode];
-  chrome.storage.local.remove(`prompt_${activeMode}`);
-});
-
-// --- Mode selector ---
-
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeMode = btn.dataset.mode;
-    chrome.storage.local.set({ mode: activeMode });
-    loadPromptForMode(activeMode);
-  });
-});
+btnDeleteSlot.addEventListener('click', deleteActiveSlot);
 
 // --- Fetch models from Ollama ---
 
@@ -276,7 +336,6 @@ async function fetchModels() {
       modelSelect.appendChild(opt);
     });
 
-    // fallback — select first if nothing matched
     if (!modelSelect.value && models.length) modelSelect.value = models[0].name;
     chrome.storage.local.set({ model: modelSelect.value });
 
@@ -296,20 +355,25 @@ modelSelect.addEventListener('change', () => {
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'mode', 'ollamaUrl', 'markdown'], ({ theme, mode, ollamaUrl, markdown }) => {
-    markdownToggle.checked = !!markdown;
-  const url = ollamaUrl || DEFAULT_OLLAMA_URL;
-  urlInput.value = url;
-  if (!ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });
+chrome.storage.local.get(['theme', 'ollamaUrl', 'markdown', 'slots', 'activeSlotId', 'settingsOpen'], (data) => {
+  markdownToggle.checked = !!data.markdown;
 
-  applyTheme(theme || getSystemTheme());
-  if (mode) {
-    activeMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.mode === mode);
-    });
-  }
-  loadPromptForMode(activeMode);
+  const url = data.ollamaUrl || DEFAULT_OLLAMA_URL;
+  urlInput.value = url;
+  if (!data.ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });
+
+  applyTheme(data.theme || getSystemTheme());
+
+  slots = data.slots?.length ? data.slots : DEFAULT_SLOTS.map(s => ({ ...s }));
+  activeSlotId = data.activeSlotId || slots[0]?.id;
+
+  // Open settings by default on first run; remember state after that
+  const showSettings = data.settingsOpen !== false;
+  settingsPanel.hidden = !showSettings;
+  btnSettings.style.color = showSettings ? 'var(--accent)' : '';
+
+  renderSlots();
+  setActiveSlot(activeSlotId);
   fetchModels();
 });
 
@@ -329,18 +393,12 @@ function setError(text) {
   errorEl.hidden = !text;
 }
 
-const MODE_BTN_LABELS = {
-  summarize: 'Summarizing…',
-  keypoints: 'Extracting…',
-  eli5: 'Simplifying…',
-  translate: 'Translating…',
-};
-
 function setGenerating(active) {
   btnStop.hidden = !active;
   if (active) {
+    const slotName = slots.find(s => s.id === activeSlotId)?.name || 'Running';
     btnSummarize.disabled = true;
-    btnSummarize.innerHTML = `<span class="btn-spinner"></span>${MODE_BTN_LABELS[activeMode]}`;
+    btnSummarize.innerHTML = `<span class="btn-spinner"></span>${slotName}…`;
   } else {
     btnSummarize.disabled = false;
     btnSummarize.textContent = 'Run';
@@ -356,11 +414,8 @@ async function getPageText() {
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: () => {
-      // Try to find the main content area, ignore nav/header/footer noise
       const candidates = [
-        'article',
-        'main',
-        '[role="main"]',
+        'article', 'main', '[role="main"]',
         '.post-content', '.article-content', '.entry-content',
         '.content', '.post', '.article',
         '#content', '#main', '#article',
@@ -369,13 +424,9 @@ async function getPageText() {
       let el = null;
       for (const selector of candidates) {
         const found = document.querySelector(selector);
-        if (found && found.innerText.trim().length > 200) {
-          el = found;
-          break;
-        }
+        if (found && found.innerText.trim().length > 200) { el = found; break; }
       }
 
-      // Fallback to body, but strip noisy elements first
       if (!el) {
         const clone = document.body.cloneNode(true);
         clone.querySelectorAll('nav, header, footer, aside, script, style, noscript, [role="navigation"], [role="banner"], [role="complementary"]').forEach(n => n.remove());
@@ -410,13 +461,12 @@ async function run() {
 
   const model = modelSelect.value || DEFAULT_MODEL;
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
-  const ollamaUrl = `${baseUrl}/api/chat`;
-  const prompt = buildPrompt(activeMode, pageText);
+  const prompt = buildPrompt(pageText);
   abortController = new AbortController();
   let fullText = '';
 
   try {
-    const response = await fetch(ollamaUrl, {
+    const response = await fetch(`${baseUrl}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

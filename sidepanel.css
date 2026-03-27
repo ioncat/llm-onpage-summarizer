@@ -365,6 +365,22 @@ body {
   color: #fff;
 }
 
+.mode-btn--add {
+  flex: 0 0 auto;
+  padding: 5px 11px;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  background: none;
+}
+
+.mode-btn--add:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: none;
+}
+
 /* Actions */
 .actions {
   display: flex;
@@ -423,6 +439,32 @@ body {
 .btn--ghost:not(:disabled):hover {
   color: var(--text);
   border-color: var(--accent);
+}
+
+.btn--danger-soft {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.btn--danger-soft:not(:disabled):hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn--accent-soft {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.btn--accent-soft:not(:disabled):hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 /* Status — plain text only, no spinner */
