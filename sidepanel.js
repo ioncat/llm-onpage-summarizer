@@ -323,10 +323,13 @@ async function run() {
     if (fullText) saveToHistory(fullText);
 
   } catch (err) {
+    setStatus('');
     if (err.name === 'AbortError') {
-      setStatus('Stopped.');
-      setTimeout(() => setStatus(''), 1500);
-      if (fullText) saveToHistory(fullText);
+      if (fullText) {
+        setStatus('Stopped.');
+        setTimeout(() => setStatus(''), 1500);
+        saveToHistory(fullText);
+      }
     } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
       setError(
         'Cannot connect to Ollama.\n\n' +
@@ -335,7 +338,7 @@ async function run() {
         `Then pull a model if needed:\n  ollama pull ${model}`
       );
     } else {
-      setError(err.message);
+      setError(`Ollama error: ${err.message}`);
     }
   } finally {
     abortController = null;
