@@ -50,9 +50,9 @@ A Chrome extension that summarizes the current web page using a **locally runnin
 
 > **The quality of the result depends directly on the prompt you write.**
 
-The extension ships with default prompts for each mode (Summarize, Key Points, ELI5, Translate). These are a starting point — they may not work well for your use case or chosen model.
+The extension ships with one default tab — **Summarize**. You can add more tabs via the **+** button, name them however you like, and write a completely custom prompt for each.
 
-Open ⚙ Settings → **Prompt template** to edit the prompt for the active mode. Use `{{text}}` as the placeholder for page content.
+Open ⚙ Settings → **Prompt template** to edit the prompt for the active tab. Use `{{text}}` as the placeholder for page content.
 
 Tips:
 - Write the prompt in the language you want the output in
