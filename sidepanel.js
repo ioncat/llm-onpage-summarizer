@@ -51,6 +51,18 @@ const PROMPTS = {
     `Translate the following web page content to ${USER_LANG}. Preserve the original structure. Output only the translation.\n\n${text}`,
 };
 
+// Prefill: start assistant response in target language to force continuation in that language
+const PREFILL = {
+  summarize: { 'Russian': '• ', 'Ukrainian': '• ', 'German': '• ', 'French': '• ', 'Spanish': '• ', 'Chinese': '• ', 'Japanese': '• ' },
+  keypoints: { 'Russian': '1. ', 'Ukrainian': '1. ', 'German': '1. ', 'French': '1. ', 'Spanish': '1. ' },
+  eli5:      { 'Russian': 'Если объяснять просто: ', 'Ukrainian': 'Якщо пояснити просто: ', 'German': 'Einfach erklärt: ', 'French': 'En termes simples: ', 'Spanish': 'En términos simples: ' },
+  translate: {},
+};
+
+function getPrefill(mode) {
+  return PREFILL[mode]?.[USER_LANG] ?? '';
+}
+
 const MODE_LABELS = {
   summarize: 'Summarizing…',
   keypoints: 'Extracting key points…',
@@ -334,8 +346,9 @@ async function run() {
         model,
         stream: true,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user',   content: prompt },
+          { role: 'system',    content: SYSTEM_PROMPT },
+          { role: 'user',      content: prompt },
+          { role: 'assistant', content: getPrefill(activeMode) },
         ],
       }),
       signal: abortController.signal,
@@ -348,6 +361,8 @@ async function run() {
 
     setStatus('');
     resultWrap.hidden = false;
+    fullText = getPrefill(activeMode); // show prefill immediately
+    resultEl.textContent = fullText;
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
