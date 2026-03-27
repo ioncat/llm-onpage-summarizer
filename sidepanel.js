@@ -321,7 +321,7 @@ async function run() {
 
   const model = modelSelect.value || DEFAULT_MODEL;
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
-  const ollamaUrl = `${baseUrl}/api/generate`;
+  const ollamaUrl = `${baseUrl}/api/chat`;
   const prompt = PROMPTS[activeMode](pageText);
   abortController = new AbortController();
   let fullText = '';
@@ -330,7 +330,14 @@ async function run() {
     const response = await fetch(ollamaUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, system: SYSTEM_PROMPT, prompt, stream: true }),
+      body: JSON.stringify({
+        model,
+        stream: true,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: prompt },
+        ],
+      }),
       signal: abortController.signal,
     });
 
@@ -354,8 +361,9 @@ async function run() {
         if (!line.trim()) continue;
         try {
           const json = JSON.parse(line);
-          if (json.response) {
-            fullText += json.response;
+          const token = json.message?.content ?? json.response ?? '';
+          if (token) {
+            fullText += token;
             resultEl.textContent = fullText;
             charCountEl.textContent = `${fullText.length} chars`;
             resultEl.scrollTop = resultEl.scrollHeight;
