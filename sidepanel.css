@@ -4,6 +4,7 @@
   padding: 0;
 }
 
+/* Dark theme (default) */
 :root {
   --bg: #1a1a1a;
   --bg-surface: #242424;
@@ -11,13 +12,73 @@
   --border: #3a3a3a;
   --text: #e8e8e8;
   --text-muted: #888;
+  --error-bg: #2d1a1a;
+  --error-border: #5a2a2a;
+  --error-text: #f08080;
   --accent: #7c6af7;
   --accent-hover: #6a58e0;
   --danger: #e05555;
   --danger-hover: #c94444;
-  --success: #4caf82;
   --radius: 8px;
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+/* Light theme vars */
+.light-vars {
+  --bg: #f7f7f8;
+  --bg-surface: #ffffff;
+  --bg-input: #ececec;
+  --border: #d8d8d8;
+  --text: #1a1a1a;
+  --text-muted: #777;
+  --error-bg: #fff0f0;
+  --error-border: #f5c0c0;
+  --error-text: #c0392b;
+  color-scheme: light;
+}
+
+/* System light preference — no manual override */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f7f7f8;
+    --bg-surface: #ffffff;
+    --bg-input: #ececec;
+    --border: #d8d8d8;
+    --text: #1a1a1a;
+    --text-muted: #777;
+    --error-bg: #fff0f0;
+    --error-border: #f5c0c0;
+    --error-text: #c0392b;
+    color-scheme: light;
+  }
+}
+
+/* Manual overrides */
+[data-theme="light"] {
+  --bg: #f7f7f8;
+  --bg-surface: #ffffff;
+  --bg-input: #ececec;
+  --border: #d8d8d8;
+  --text: #1a1a1a;
+  --text-muted: #777;
+  --error-bg: #fff0f0;
+  --error-border: #f5c0c0;
+  --error-text: #c0392b;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --bg-surface: #242424;
+  --bg-input: #2e2e2e;
+  --border: #3a3a3a;
+  --text: #e8e8e8;
+  --text-muted: #888;
+  --error-bg: #2d1a1a;
+  --error-border: #5a2a2a;
+  --error-text: #f08080;
+  color-scheme: dark;
 }
 
 body {
@@ -51,6 +112,24 @@ body {
   font-weight: 600;
   color: var(--text);
   letter-spacing: 0.01em;
+  flex: 1;
+}
+
+.btn--theme {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 7px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn--theme:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 /* Settings */
@@ -225,10 +304,10 @@ body {
 
 /* Error */
 .error {
-  background: #2d1a1a;
-  border: 1px solid #5a2a2a;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
   border-radius: var(--radius);
-  color: #f08080;
+  color: var(--error-text);
   font-size: 12px;
   line-height: 1.6;
   padding: 10px 12px;

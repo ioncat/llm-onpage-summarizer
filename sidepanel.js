@@ -8,6 +8,7 @@ const modelInput   = document.getElementById('model-input');
 const btnSummarize = document.getElementById('btn-summarize');
 const btnStop      = document.getElementById('btn-stop');
 const btnCopy      = document.getElementById('btn-copy');
+const btnTheme     = document.getElementById('btn-theme');
 const statusEl     = document.getElementById('status');
 const resultWrap   = document.getElementById('result-wrap');
 const resultEl     = document.getElementById('result');
@@ -16,15 +17,41 @@ const errorEl      = document.getElementById('error');
 
 let abortController = null;
 
-// --- Init ---
+// --- Theme ---
 
-chrome.storage.local.get('model', ({ model }) => {
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  btnTheme.textContent = theme === 'dark' ? '☀' : '🌙';
+  btnTheme.title = theme === 'dark' ? 'Switch to light' : 'Switch to dark';
+}
+
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+chrome.storage.local.get(['model', 'theme'], ({ model, theme }) => {
   modelInput.value = model || DEFAULT_MODEL;
+  applyTheme(theme || getSystemTheme());
+});
+
+btnTheme.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  chrome.storage.local.set({ theme: next });
+});
+
+// Follow system changes when no manual override is saved
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  chrome.storage.local.get('theme', ({ theme }) => {
+    if (!theme) applyTheme(e.matches ? 'dark' : 'light');
+  });
 });
 
 modelInput.addEventListener('change', () => {
   chrome.storage.local.set({ model: modelInput.value.trim() || DEFAULT_MODEL });
 });
+
 
 // --- Helpers ---
 
