@@ -29,17 +29,24 @@ let activeMode = 'summarize';
 
 // --- Prompt templates ---
 
-const USER_LANG = navigator.language || 'en';
+const USER_LANG_CODE = (navigator.language || 'en').split('-')[0];
+const USER_LANG = (() => {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'language' }).of(USER_LANG_CODE) || 'English';
+  } catch {
+    return 'English';
+  }
+})();
 
 const PROMPTS = {
   summarize: (text) =>
-    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases. Respond in the language with code "${USER_LANG}".\n\n${text}`,
+    `Summarize the following web page content in 4–6 concise bullet points. Be specific, avoid filler phrases. You MUST respond entirely in ${USER_LANG}, regardless of the page language.\n\n${text}`,
   keypoints: (text) =>
-    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list. Respond in the language with code "${USER_LANG}".\n\n${text}`,
+    `Extract the 5–8 most important key points from the following web page content. Format as a numbered list. You MUST respond entirely in ${USER_LANG}, regardless of the page language.\n\n${text}`,
   eli5: (text) =>
-    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences. Respond in the language with code "${USER_LANG}".\n\n${text}`,
+    `Explain the following web page content as if I'm 5 years old. Use simple words and short sentences. You MUST respond entirely in ${USER_LANG}, regardless of the page language.\n\n${text}`,
   translate: (text) =>
-    `Translate the following web page content to the language with code "${USER_LANG}". Preserve the original structure.\n\n${text}`,
+    `Translate the following web page content to ${USER_LANG}. Preserve the original structure. Output only the translation.\n\n${text}`,
 };
 
 const MODE_LABELS = {
