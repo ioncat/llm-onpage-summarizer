@@ -13,6 +13,7 @@ const btnRefreshModels   = document.getElementById('btn-refresh-models');
 const btnSummarize  = document.getElementById('btn-summarize');
 const btnStop       = document.getElementById('btn-stop');
 const btnCopy       = document.getElementById('btn-copy');
+const btnClear      = document.getElementById('btn-clear');
 const btnTheme      = document.getElementById('btn-theme');
 const btnSettings   = document.getElementById('btn-settings');
 const btnHistory    = document.getElementById('btn-history');
@@ -429,6 +430,13 @@ btnSummarize.addEventListener('click', run);
 
 btnStop.addEventListener('click', () => {
   abortController?.abort();
+});
+
+btnClear.addEventListener('click', () => {
+  resultEl.textContent = '';
+  charCountEl.textContent = '';
+  resultWrap.hidden = true;
+  errorEl.hidden = true;
 });
 
 btnCopy.addEventListener('click', () => {
