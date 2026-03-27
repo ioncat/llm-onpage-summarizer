@@ -56,7 +56,7 @@ Open ⚙ Settings → **Prompt template** to edit the prompt for the active mode
 
 Tips:
 - Write the prompt in the language you want the output in
-- Be explicit: "Reply in Russian", "Use bullet points", "Keep it under 5 sentences"
+- Be explicit: "Reply in --language--", "Use bullet points", "Keep it under 5 sentences"
 - If results are generic or off-topic, rewrite the prompt first before switching models
 
 ## Model choice matters
@@ -76,7 +76,7 @@ Different Ollama models produce **very different results** for the same prompt:
 
 ## Privacy
 
-All processing is local. The extension never sends data to any external server. Page text is only sent to `localhost`.
+While using Ollama, all processing is local. The extension never sends data to any external server. Page text is only sent to `localhost`.
 
 ## License
 
