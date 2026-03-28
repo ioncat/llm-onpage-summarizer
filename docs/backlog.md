@@ -7,16 +7,16 @@
 ## Phase 1 — MVP (core flow)
 > Goal: minimal working extension — Summarize button + streaming into side panel
 
-| # | Task | Status | Time |
-|---|------|--------|------|
-| 1.1 | `manifest.json` — MV3, permissions, sidePanel | ✅ | — |
-| 1.2 | `background.js` — service worker, open side panel | ✅ | — |
-| 1.3 | `sidepanel.html` — basic markup | ✅ | — |
-| 1.4 | `sidepanel.css` — basic styles | ✅ | — |
-| 1.5 | `sidepanel.js` — extract page text | ✅ | — |
-| 1.6 | `sidepanel.js` — POST request to Ollama + NDJSON streaming | ✅ | — |
-| 1.7 | `sidepanel.js` — display result token by token | ✅ | — |
-| 1.8 | Error state — Ollama unavailable, user-friendly hint | ✅ | — |
+| # | Task | Status |
+|---|------|--------|
+| 1.1 | `manifest.json` — MV3, permissions, sidePanel | ✅ |
+| 1.2 | `background.js` — service worker, open side panel | ✅ |
+| 1.3 | `sidepanel.html` — basic markup | ✅ |
+| 1.4 | `sidepanel.css` — basic styles | ✅ |
+| 1.5 | `sidepanel.js` — extract page text | ✅ |
+| 1.6 | `sidepanel.js` — POST request to Ollama + NDJSON streaming | ✅ |
+| 1.7 | `sidepanel.js` — display result token by token | ✅ |
+| 1.8 | Error state — Ollama unavailable, user-friendly hint | ✅ |
 
 **Phase 1 total: ~1 h**
 
@@ -25,15 +25,15 @@
 ## Phase 2 — UX Polish
 > Goal: usability improvements, saved settings, additional controls
 
-| # | Task | Status | Time |
-|---|------|--------|------|
-| 2.1 | Save selected model to `chrome.storage.local` | ✅ | — |
-| 2.2 | Character counter / warning for long pages | ✅ | — |
-| 2.3 | Copy button — copy result to clipboard | ✅ | — |
-| 2.4 | Stop button — abort generation (AbortController) | ✅ | — |
-| 2.5 | Extension icons (16/48/128 px) | ✅ | — |
-| 2.6 | Loader / spinner during generation | ✅ | — |
-| 2.7 | Dark/Light theme toggle + system preference | ✅ | — |
+| # | Task | Status |
+|---|------|--------|
+| 2.1 | Save selected model to `chrome.storage.local` | ✅ |
+| 2.2 | Character counter / warning for long pages | ✅ |
+| 2.3 | Copy button — copy result to clipboard | ✅ |
+| 2.4 | Stop button — abort generation (AbortController) | ✅ |
+| 2.5 | Extension icons (16/48/128 px) | ✅ |
+| 2.6 | Loader / spinner during generation | ✅ |
+| 2.7 | Dark/Light theme toggle + system preference | ✅ |
 
 **Phase 2 total: ~1 h**
 
@@ -42,19 +42,19 @@
 ## Phase 3 — Extras
 > Goal: advanced features
 
-| # | Task | Status | Time |
-|---|------|--------|------|
-| 3.1 | Prompt templates: Summarize / Key Points / ELI5 / Translate | ✅ | — |
-| 3.2 | Editable prompt with `{{text}}` placeholder | ✅ | — |
-| 3.3 | Model selector from dropdown (`/api/tags`) + refresh button | ✅ | — |
-| 3.4 | Configurable Ollama base URL | ✅ | — |
-| 3.5 | History of last 8 summaries (chrome.storage) | ✅ | — |
-| 3.6 | Smart content extraction (article/main, strip nav/footer) | ✅ | — |
-| 3.7 | Markdown rendering toggle | ✅ | — |
-| 3.8 | Clear button to reset result | ✅ | — |
-| 3.9 | Color-coded buttons: Clear (red) and Copy (purple) | ✅ | — |
-| 3.10 | Dynamic prompt tabs — add, rename, delete | ✅ | — |
-| 3.11 | Settings open by default on first run, state remembered | ✅ | — |
+| # | Task | Status |
+|---|------|--------|
+| 3.1 | Prompt templates: Summarize / Key Points / ELI5 / Translate | ✅ |
+| 3.2 | Editable prompt with `{{text}}` placeholder | ✅ |
+| 3.3 | Model selector from dropdown (`/api/tags`) + refresh button | ✅ |
+| 3.4 | Configurable Ollama base URL | ✅ |
+| 3.5 | History of last 8 summaries (chrome.storage) | ✅ |
+| 3.6 | Smart content extraction (article/main, strip nav/footer) | ✅ |
+| 3.7 | Markdown rendering toggle | ✅ |
+| 3.8 | Clear button to reset result | ✅ |
+| 3.9 | Color-coded buttons: Clear (red) and Copy (purple) | ✅ |
+| 3.10 | Dynamic prompt tabs — add, rename, delete | ✅ |
+| 3.11 | Settings open by default on first run, state remembered | ✅ |
 
 **Phase 3 total: ~2.5 h**
 
@@ -63,11 +63,11 @@
 ## Phase 3.5 — Settings & Prompt improvements
 > Goal: finer control over model input and prompt behavior
 
-| # | Task | Status | Time |
-|---|------|--------|------|
-| 3.12 | Max text length setting in UI (1k–50k, default 12k) | ✅ | — |
-| 3.13 | Lock default Summarize tab against rename and deletion | ✅ | — |
-| 3.14 | Remove system prompt; move Markdown instruction into user prompt | ✅ | — |
+| # | Task | Status |
+|---|------|--------|
+| 3.12 | Max text length setting in UI (1k–50k, default 12k) | ✅ |
+| 3.13 | Lock default Summarize tab against rename and deletion | ✅ |
+| 3.14 | Remove system prompt; move Markdown instruction into user prompt | ✅ |
 
 **Phase 3.5 total: ~30 min**
 
