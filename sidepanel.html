@@ -42,14 +42,29 @@
         ></textarea>
         <span class="settings__hint">Use <code>{{text}}</code> where page content should go</span>
       </div>
-      <div class="settings-row">
-        <label class="settings__label" for="model-select">Model</label>
-        <div class="model-row">
-          <select id="model-select" class="settings__input settings__select">
-            <option value="">Loading models…</option>
-          </select>
-          <button id="btn-refresh-models" class="btn btn--ghost btn--icon" title="Refresh models">↻</button>
+      <div class="settings-row settings-row--2col">
+        <div>
+          <label class="settings__label" for="model-select">Model</label>
+          <div class="model-row">
+            <select id="model-select" class="settings__input settings__select">
+              <option value="">Loading models…</option>
+            </select>
+            <button id="btn-refresh-models" class="btn btn--ghost btn--icon" title="Refresh models">↻</button>
+          </div>
         </div>
+        <div>
+          <label class="settings__label" for="max-length-input">Max chars</label>
+          <input
+            id="max-length-input"
+            class="settings__input"
+            type="number"
+            min="1000"
+            max="50000"
+            step="1000"
+            autocomplete="off"
+          />
+        </div>
+        <span class="settings__hint" style="grid-column: 1 / -1">Max chars controls how much page text is passed as <code>{{text}}</code> to the model — more context means better results but slower responses.</span>
       </div>
       <div class="settings-row">
         <label class="settings__label" for="url-input">Ollama URL</label>

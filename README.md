@@ -2,10 +2,21 @@
 
 A Chrome extension that summarizes the current web page using a **locally running LLM via [Ollama](https://ollama.com)**. No cloud, no API keys, fully private — everything runs on your machine.
 
+## Why bother?
+
+You shouldn't read everything that lands in your browser. Most content isn't worth your time.
+
+- **Cut the Noise** — get the gist of articles, logs, or tickets instantly.
+- **Zero Friction** — no tab switching, no copy-pasting.
+- **Decide Faster** — see the core idea first, then decide if it's worth the deep dive.
+- **Your Data, Your Call** — run it locally with Ollama, or connect a cloud model. You choose what leaves your machine.
+
+Stop wasting minutes on fluff. Start with the summary.
+
 ## How it works
 
 1. Click the extension icon — a side panel opens
-2. Select a mode: **Summarize**, **Key Points**, **ELI5**, or **Translate**
+2. Select a mode: **Summarize** or **Custom**
 3. Click **Run**
 4. The extension extracts the page text and sends it to your local Ollama instance
 5. The result streams back token by token into the panel

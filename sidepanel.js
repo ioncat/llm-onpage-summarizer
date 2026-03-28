@@ -13,6 +13,7 @@ const urlInput          = document.getElementById('url-input');
 const promptEditor      = document.getElementById('prompt-editor');
 const slotNameInput     = document.getElementById('slot-name-input');
 const btnDeleteSlot     = document.getElementById('btn-delete-slot');
+const maxLengthInput    = document.getElementById('max-length-input');
 const btnRefreshModels  = document.getElementById('btn-refresh-models');
 const btnSummarize      = document.getElementById('btn-summarize');
 const btnStop           = document.getElementById('btn-stop');
@@ -51,17 +52,8 @@ const USER_LANG = (() => {
 // --- Default slots ---
 
 const DEFAULT_SLOTS = [
-  { id: 'slot_1', name: 'Summarize', prompt: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}` },
+  { id: 'slot_1', name: 'Summarize', locked: true, prompt: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}` },
 ];
-
-// --- System prompt ---
-
-function getSystemPrompt() {
-  const md = markdownToggle?.checked
-    ? ' Format your response using Markdown (headers, bold, bullet lists where appropriate).'
-    : '';
-  return `You are a helpful assistant. You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.${md}`;
-}
 
 // --- Slot management ---
 
@@ -93,6 +85,8 @@ function setActiveSlot(id) {
 
   promptEditor.value = slot.prompt;
   slotNameInput.value = slot.name;
+  slotNameInput.disabled = !!slot.locked;
+  btnDeleteSlot.hidden = !!slot.locked;
   btnDeleteSlot.disabled = slots.length <= 1;
 
   renderSlots();
@@ -119,7 +113,8 @@ function addSlot() {
 }
 
 function deleteActiveSlot() {
-  if (slots.length <= 1) return;
+  const current = slots.find(s => s.id === activeSlotId);
+  if (slots.length <= 1 || current?.locked) return;
   const idx = slots.findIndex(s => s.id === activeSlotId);
   slots.splice(idx, 1);
   const next = slots[Math.min(idx, slots.length - 1)];
@@ -132,7 +127,11 @@ function deleteActiveSlot() {
 function buildPrompt(pageText) {
   const slot = slots.find(s => s.id === activeSlotId);
   const template = slot?.prompt || '{{text}}';
-  return template.replace('{{text}}', pageText);
+  let prompt = template.replace('{{text}}', pageText);
+  if (markdownToggle.checked) {
+    prompt += '\n\nFormat your response using Markdown (headers, bold, bullet lists where appropriate).';
+  }
+  return prompt;
 }
 
 // --- Markdown parser ---
@@ -286,7 +285,7 @@ btnClearHist.addEventListener('click', () => {
 
 slotNameInput.addEventListener('input', () => {
   const slot = slots.find(s => s.id === activeSlotId);
-  if (!slot) return;
+  if (!slot || slot.locked) return;
   slot.name = slotNameInput.value.trim() || 'Custom';
   renderSlots();
   saveSlots();
@@ -355,16 +354,20 @@ modelSelect.addEventListener('change', () => {
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'ollamaUrl', 'markdown', 'slots', 'activeSlotId', 'settingsOpen'], (data) => {
+chrome.storage.local.get(['theme', 'ollamaUrl', 'markdown', 'slots', 'activeSlotId', 'settingsOpen', 'maxLength'], (data) => {
   markdownToggle.checked = !!data.markdown;
 
   const url = data.ollamaUrl || DEFAULT_OLLAMA_URL;
   urlInput.value = url;
   if (!data.ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });
 
+  maxLengthInput.value = data.maxLength || MAX_TEXT_LENGTH;
+
   applyTheme(data.theme || getSystemTheme());
 
   slots = data.slots?.length ? data.slots : DEFAULT_SLOTS.map(s => ({ ...s }));
+  const s1 = slots.find(s => s.id === 'slot_1');
+  if (s1) s1.locked = true;
   activeSlotId = data.activeSlotId || slots[0]?.id;
 
   // Open settings by default on first run; remember state after that
@@ -379,6 +382,12 @@ chrome.storage.local.get(['theme', 'ollamaUrl', 'markdown', 'slots', 'activeSlot
 
 urlInput.addEventListener('change', () => {
   chrome.storage.local.set({ ollamaUrl: urlInput.value.trim() || DEFAULT_OLLAMA_URL });
+});
+
+maxLengthInput.addEventListener('change', () => {
+  const val = Math.min(50000, Math.max(1000, parseInt(maxLengthInput.value, 10) || MAX_TEXT_LENGTH));
+  maxLengthInput.value = val;
+  chrome.storage.local.set({ maxLength: val });
 });
 
 // --- Helpers ---
@@ -438,7 +447,8 @@ async function getPageText() {
   });
 
   if (!result) throw new Error('Could not extract text from this page.');
-  return result.slice(0, MAX_TEXT_LENGTH);
+  const maxLen = parseInt(maxLengthInput.value, 10) || MAX_TEXT_LENGTH;
+  return result.slice(0, maxLen);
 }
 
 // --- Ollama streaming ---
@@ -473,8 +483,7 @@ async function run() {
         model,
         stream: true,
         messages: [
-          { role: 'system', content: getSystemPrompt() },
-          { role: 'user',   content: prompt },
+          { role: 'user', content: prompt },
         ],
       }),
       signal: abortController.signal,

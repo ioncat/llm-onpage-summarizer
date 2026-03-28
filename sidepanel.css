@@ -187,6 +187,12 @@ body {
   gap: 4px;
 }
 
+.settings-row--2col {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
 .prompt-label-row {
   display: flex;
   align-items: center;
