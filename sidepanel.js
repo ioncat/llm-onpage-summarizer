@@ -15,6 +15,8 @@ const slotNameInput     = document.getElementById('slot-name-input');
 const btnDeleteSlot     = document.getElementById('btn-delete-slot');
 const maxLengthInput    = document.getElementById('max-length-input');
 const btnRefreshModels  = document.getElementById('btn-refresh-models');
+const btnManageModels   = document.getElementById('btn-manage-models');
+const modelManager      = document.getElementById('model-manager');
 const btnSummarize      = document.getElementById('btn-summarize');
 const btnStop           = document.getElementById('btn-stop');
 const btnCopy           = document.getElementById('btn-copy');
@@ -41,6 +43,8 @@ let abortController = null;
 let slots = [];
 let activeSlotId = null;
 let pendingSelectionText = null;
+let modelList = [];
+let modelMeta = {};
 
 // --- Selection from context menu ---
 
@@ -352,6 +356,130 @@ markdownToggle.addEventListener('change', () => {
 
 btnDeleteSlot.addEventListener('click', deleteActiveSlot);
 
+// --- Model meta (ratings + hidden) ---
+
+function saveModelMeta() {
+  chrome.storage.local.set({ modelMeta });
+}
+
+function getMeta(name) {
+  if (!modelMeta[name]) modelMeta[name] = { rating: 0, hidden: false };
+  return modelMeta[name];
+}
+
+function renderModelSelect() {
+  const activeSlot = slots.find(s => s.id === activeSlotId);
+  const savedModel = activeSlot?.model || '';
+
+  const visible = modelList
+    .filter(n => !getMeta(n).hidden)
+    .sort((a, b) => getMeta(b).rating - getMeta(a).rating);
+
+  modelSelect.innerHTML = '';
+  if (!visible.length) {
+    modelSelect.innerHTML = '<option value="">No models available</option>';
+    return;
+  }
+
+  visible.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    if (name === savedModel) opt.selected = true;
+    modelSelect.appendChild(opt);
+  });
+
+  if (!modelSelect.value) modelSelect.value = visible[0];
+  if (activeSlot && activeSlot.model !== modelSelect.value) {
+    activeSlot.model = modelSelect.value;
+    saveSlots();
+  }
+}
+
+function renderModelManager() {
+  modelManager.innerHTML = '';
+
+  const visible = modelList.filter(n => !getMeta(n).hidden);
+  const hidden  = modelList.filter(n =>  getMeta(n).hidden);
+
+  const makeRow = (name, isHidden) => {
+    const meta = getMeta(name);
+    const row = document.createElement('div');
+    row.className = 'model-manager__item' + (isHidden ? ' model-manager__item--hidden' : '');
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'model-manager__name';
+    nameEl.textContent = name;
+    nameEl.title = name;
+
+    const stars = document.createElement('div');
+    stars.className = 'model-manager__stars';
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'star-btn' + (i <= meta.rating ? ' filled' : '');
+      btn.textContent = '★';
+      btn.title = `Rate ${i}`;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        getMeta(name).rating = getMeta(name).rating === i ? 0 : i;
+        saveModelMeta();
+        renderModelSelect();
+        renderModelManager();
+      });
+      stars.appendChild(btn);
+    }
+
+    const action = document.createElement('button');
+    action.className = 'model-manager__action';
+    if (isHidden) {
+      action.textContent = 'Show';
+      action.addEventListener('click', (e) => {
+        e.stopPropagation();
+        getMeta(name).hidden = false;
+        saveModelMeta();
+        renderModelSelect();
+        renderModelManager();
+      });
+    } else {
+      action.textContent = 'Hide';
+      action.addEventListener('click', (e) => {
+        e.stopPropagation();
+        getMeta(name).hidden = true;
+        saveModelMeta();
+        // If hidden model was selected — switch to first visible
+        if (modelSelect.value === name) {
+          const first = modelList.find(n => !getMeta(n).hidden && n !== name);
+          if (first) { modelSelect.value = first; modelSelect.dispatchEvent(new Event('change')); }
+        }
+        renderModelSelect();
+        renderModelManager();
+      });
+    }
+
+    row.append(nameEl, stars, action);
+    return row;
+  };
+
+  visible.forEach(n => modelManager.appendChild(makeRow(n, false)));
+
+  if (hidden.length) {
+    const div = document.createElement('div');
+    div.className = 'model-manager__divider';
+    div.textContent = `Hidden (${hidden.length})`;
+    modelManager.appendChild(div);
+    hidden.forEach(n => modelManager.appendChild(makeRow(n, true)));
+  }
+}
+
+const modelManagerHint = document.getElementById('model-manager-hint');
+
+btnManageModels.addEventListener('click', () => {
+  const open = !modelManager.hidden;
+  modelManager.hidden = open;
+  modelManagerHint.hidden = open;
+  btnManageModels.textContent = open ? 'Manage models ▾' : 'Manage models ▴';
+});
+
 // --- Fetch models from Ollama ---
 
 async function fetchModels() {
@@ -365,27 +493,14 @@ async function fetchModels() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const { models = [] } = await res.json();
 
-    const activeSlot = slots.find(s => s.id === activeSlotId);
-    const savedModel = activeSlot?.model || '';
-
-    modelSelect.innerHTML = '';
     if (!models.length) {
       modelSelect.innerHTML = '<option value="">No models found</option>';
       return;
     }
 
-    models.forEach(({ name }) => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      if (name === savedModel || (!savedModel && name.startsWith(DEFAULT_MODEL))) {
-        opt.selected = true;
-      }
-      modelSelect.appendChild(opt);
-    });
-
-    if (!modelSelect.value && models.length) modelSelect.value = models[0].name;
-    if (activeSlot) { activeSlot.model = modelSelect.value; saveSlots(); }
+    modelList = models.map(m => m.name);
+    renderModelSelect();
+    renderModelManager();
 
   } catch {
     modelSelect.innerHTML = `<option value="">Cannot reach Ollama</option>`;
@@ -404,7 +519,8 @@ modelSelect.addEventListener('change', () => {
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown'], (data) => {
+chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown', 'modelMeta'], (data) => {
+  modelMeta = data.modelMeta || {};
   const url = data.ollamaUrl || DEFAULT_OLLAMA_URL;
   urlInput.value = url;
   if (!data.ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });

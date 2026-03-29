@@ -108,6 +108,17 @@ Different models produce **very different results** for the same prompt:
 
 **There is no single best model.** Experiment with prompt + model combinations. A well-written prompt on a small model often beats a lazy prompt on a large one.
 
+### Managing your model list
+
+When you have many models installed, the dropdown gets noisy fast. **Manage models** lets you build a personal layer on top of what Ollama provides — rate what works, hide what doesn't — without touching Ollama itself.
+
+Open ⚙ Settings → **Manage models**:
+
+- **★★★★★ — Rate models** by clicking the stars next to each name. Highly rated models float to the top of the dropdown so your best options are always first.
+- **Hide** — removes a model from the dropdown without touching Ollama. Useful for models you've tested and ruled out. Hidden models appear in a separate "Hidden" section and can be restored at any time.
+
+Ratings and hidden state are saved locally in the extension and survive restarts. They are independent of prompt tabs — one rating applies across all tabs.
+
 ## Privacy
 
 While using Ollama, all processing is local. The extension never sends data to any external server. Page text is only sent to `localhost`.

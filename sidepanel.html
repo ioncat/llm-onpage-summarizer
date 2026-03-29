@@ -66,6 +66,9 @@
         </div>
         <span class="settings__hint" style="grid-column: 1 / -1">Max chars controls how much page text is passed as <code>{{text}}</code> to the model — more context means better results but slower responses.</span>
       </div>
+      <button id="btn-manage-models" class="settings__link">Manage models ▾</button>
+      <div id="model-manager" class="model-manager" hidden></div>
+      <span id="model-manager-hint" class="settings__hint" hidden>Rate models with ★ to sort your best ones to the top. Hide models you don't use — they stay in Ollama but disappear from the dropdown.</span>
       <div class="settings-row">
         <label class="settings__label" for="url-input">Ollama URL</label>
         <input

@@ -289,6 +289,103 @@ body {
   padding: 6px 10px;
 }
 
+/* Model manager */
+.settings__link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font);
+  padding: 0;
+  text-align: left;
+  opacity: 0.8;
+}
+
+.settings__link:hover { opacity: 1; }
+
+.model-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.model-manager::-webkit-scrollbar { width: 4px; }
+.model-manager::-webkit-scrollbar-track { background: transparent; }
+.model-manager::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.model-manager__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+
+.model-manager__item:hover { background: var(--bg-surface); }
+
+.model-manager__item--hidden { opacity: 0.45; }
+
+.model-manager__name {
+  flex: 1;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-manager__stars {
+  display: flex;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 1px;
+  color: var(--text-muted);
+  transition: color 0.1s, transform 0.1s;
+}
+
+.star-btn:hover { transform: scale(1.2); }
+.star-btn.filled { color: #f5a623; }
+
+.model-manager__action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 1px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color 0.1s, background 0.1s;
+}
+
+.model-manager__action:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+.model-manager__divider {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 6px 2px;
+}
+
 /* History panel */
 .history-panel {
   background: var(--bg-surface);
