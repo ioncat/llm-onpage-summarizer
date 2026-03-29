@@ -42,7 +42,8 @@ Stop wasting minutes on fluff. Start with the summary.
 | Control | Description |
 |---|---|
 | Tabs | Switch between prompt tabs (Summarize + any custom tabs you add) |
-| **Run** | Extract page text and send to Ollama |
+| **Run** | Extract full page text and send to Ollama |
+| Right-click → **Analyze with LLM Summarizer** | Select any text on the page, right-click, and send just that fragment — useful when you want to analyze a specific section rather than the whole page |
 | **Stop** | Cancel an in-progress generation |
 | **Clear** | Remove the current result |
 | **Copy** | Copy result to clipboard |
