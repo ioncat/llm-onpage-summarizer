@@ -109,6 +109,8 @@
 
 | # | Idea | Priority |
 |---|------|----------|
+| 5.1 | LM Studio / OpenAI-compatible local provider support (`/v1/models`, `/v1/chat/completions`, SSE streaming) | medium |
+| 5.2 | Provider abstraction layer — clean separation of Ollama vs OpenAI-compatible API logic | medium |
 | 5.3 | Editable system prompt in settings | medium |
 
 ---

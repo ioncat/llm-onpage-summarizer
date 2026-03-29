@@ -17,11 +17,17 @@ Stop wasting minutes on fluff. Start with the summary.
 
 ## How it works
 
+**Full page:**
 1. Click the extension icon — a side panel opens
-2. Select a mode: **Summarize** or **Custom**
+2. Select a mode: **Summarize** or any custom tab
 3. Click **Run**
 4. The extension extracts the page text and sends it to your local Ollama instance
 5. The result streams back token by token into the panel
+
+**Selected text:**
+1. Select any text on the page with your mouse
+2. Right-click → **Analyze with LLM Summarizer**
+3. The side panel opens and runs automatically with just that fragment
 
 ## Requirements
 
