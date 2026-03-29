@@ -690,8 +690,6 @@ async function run() {
   const model = modelSelect.value || DEFAULT_MODEL;
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
   const prompt = buildPrompt(pageText);
-  console.log('[LLM] source:', textSource);
-  console.log('[LLM] prompt:', prompt);
   abortController = new AbortController();
   let fullText = '';
 
