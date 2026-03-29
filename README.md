@@ -9,7 +9,7 @@ You shouldn't read everything that lands in your browser. Most content isn't wor
 - **Cut the Noise** — get the gist of articles, logs, or tickets instantly.
 - **Zero Friction** — no tab switching, no copy-pasting.
 - **Decide Faster** — see the core idea first, then decide if it's worth the deep dive.
-- **Your Data, Your Call** — run it locally with Ollama, or connect a cloud model. You choose what leaves your machine.
+- **Your Data, Your Call** — everything runs locally via Ollama. Your content never leaves your machine.
 
 Stop wasting minutes on fluff. Start with the summary.
 
