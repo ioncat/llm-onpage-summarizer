@@ -13,6 +13,7 @@ Time analysis based on git history (commit timestamps).
 |------|---------|-----------------|-------------|
 | 2026-03-27 | 27 | Phase 1 MVP + Phase 2 UX + Phase 3 Extras (prompt templates, model dropdown, history, Markdown, dynamic prompt tabs, Clear/Copy buttons, settings open by default, dropdown arrow) | 4 h 38 min (17:12–21:50) |
 | 2026-03-28 | 5 | Phase 3.5: Max text length in UI, lock Summarize tab, remove system prompt, README "Why bother?" section, .gitignore | ~1 h |
+| 2026-03-29 | 12 | Phase 3.6: context menu selection, per-tab settings, model ratings + hide, permissions cleanup, NDJSON streaming fix, README updates | ~3 h |
 
 *Table updated after each session.*
 
@@ -26,8 +27,9 @@ Time analysis based on git history (commit timestamps).
 | Phase 2 — UX Polish | 4 | ~1 h |
 | Phase 3 — Extras | 18 | ~2.5 h |
 | Phase 3.5 — Settings & Prompt | 3 | ~30 min |
+| Phase 3.6 — Quality & reliability | 12 | ~3 h |
 | Docs / Infra | 4 | ~30 min |
-| **Total** | **32** | **~5 h 30 min** |
+| **Total** | **44** | **~8 h** |
 
 ---
 
@@ -68,3 +70,15 @@ Then update the tables above manually (or ask Claude).
 | Completed | Settings UX (Max chars, locked Summarize tab), system prompt removal, README motivation section, .gitignore |
 | Commits | 5 |
 | Time | ~1 h |
+
+---
+
+## Session 3 — 2026-03-29
+
+| Parameter | Value |
+|-----------|-------|
+| Date | 2026-03-29 |
+| Status | ✅ Phase 3.6 complete |
+| Completed | Context menu text selection, per-tab settings, model ratings + hide UI, permissions minimization, NDJSON streaming buffer fix, README updates |
+| Commits | 12 |
+| Time | ~3 h |

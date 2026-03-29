@@ -90,6 +90,21 @@
 
 ---
 
+## Phase 3.6 — Quality & reliability fixes
+> Goal: address technical debt and correctness issues
+
+| # | Task | Status |
+|---|------|--------|
+| 3.15 | Context menu: analyze selected text via right-click | ✅ |
+| 3.16 | Per-tab settings (model, max chars, markdown, prompt) | ✅ |
+| 3.17 | Model ratings (1–5 ★) and hide — Manage models UI | ✅ |
+| 3.18 | Minimize manifest permissions — move `<all_urls>` to optional | ✅ |
+| 3.19 | Fix NDJSON streaming: add accumulator buffer for partial chunks | ✅ |
+
+**Phase 3.6 total: ~2 h**
+
+---
+
 ## Other improvements (planned)
 
 | # | Idea | Priority |
@@ -106,4 +121,5 @@
 | Phase 2 — UX Polish | ✅ | ~1 h |
 | Phase 3 — Extras | ✅ | ~2.5 h |
 | Phase 3.5 — Settings & Prompt | ✅ | ~30 min |
-| **Total** | | **~5 h** |
+| Phase 3.6 — Quality & reliability | ✅ | ~2 h |
+| **Total** | | **~7 h** |
