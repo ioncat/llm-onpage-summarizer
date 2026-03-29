@@ -67,7 +67,7 @@
 |---|------|--------|
 | 3.12 | Max text length setting in UI (1k–50k, default 12k) | ✅ |
 | 3.13 | Lock default Summarize tab against rename and deletion | ✅ |
-| 3.14 | Remove system prompt; move Markdown instruction into user prompt | ✅ |
+| 3.14 | Refactor system prompt: remove "helpful assistant", enforce browser language + Markdown instruction | ✅ |
 
 **Phase 3.5 total: ~30 min**
 
