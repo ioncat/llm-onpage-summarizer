@@ -13,6 +13,8 @@ You shouldn't read everything that lands in your browser. Most content isn't wor
 
 Stop wasting minutes on fluff. Start with the summary.
 
+![LLM Onpage Summarizer screenshot](docs/screenshot.png)
+
 ## How it works
 
 1. Click the extension icon — a side panel opens
