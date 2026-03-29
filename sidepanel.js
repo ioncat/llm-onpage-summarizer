@@ -13,6 +13,7 @@ const urlInput          = document.getElementById('url-input');
 const promptEditor      = document.getElementById('prompt-editor');
 const slotNameInput     = document.getElementById('slot-name-input');
 const btnDeleteSlot     = document.getElementById('btn-delete-slot');
+const btnResetDefaults  = document.getElementById('btn-reset-defaults');
 const maxLengthInput    = document.getElementById('max-length-input');
 const btnRefreshModels  = document.getElementById('btn-refresh-models');
 const btnManageModels   = document.getElementById('btn-manage-models');
@@ -243,7 +244,7 @@ function renderResult(text) {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  btnTheme.textContent = theme === 'dark' ? '☀' : '🌙';
+  btnTheme.textContent = theme === 'dark' ? '☀️' : '🌙';
   btnTheme.title = theme === 'dark' ? 'Switch to light' : 'Switch to dark';
 }
 
@@ -355,6 +356,29 @@ markdownToggle.addEventListener('change', () => {
 });
 
 btnDeleteSlot.addEventListener('click', deleteActiveSlot);
+
+btnResetDefaults.addEventListener('click', () => {
+  if (!confirm('Reset all settings to defaults? This will remove custom tabs and restore the original prompt. Model ratings are kept.')) return;
+
+  slots = DEFAULT_SLOTS.map(s => ({ ...s }));
+  activeSlotId = slots[0].id;
+
+  chrome.storage.local.set({
+    slots,
+    activeSlotId,
+    ollamaUrl: DEFAULT_OLLAMA_URL,
+    settingsOpen: true,
+  });
+
+  urlInput.value = DEFAULT_OLLAMA_URL;
+  markdownToggle.checked = false;
+  maxLengthInput.value = MAX_TEXT_LENGTH;
+
+  renderSlots();
+  setActiveSlot(activeSlotId);
+  renderModelSelect();
+  renderModelManager();
+});
 
 // --- Model meta (ratings + hidden) ---
 
