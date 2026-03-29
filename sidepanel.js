@@ -587,12 +587,9 @@ function setGenerating(active) {
 
 // --- Extract page text ---
 
-async function getPageText() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) throw new Error('No active tab found.');
-
+async function executeExtraction(tabId) {
   const [{ result }] = await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
+    target: { tabId },
     func: () => {
       const candidates = [
         'article', 'main', '[role="main"]',
@@ -616,6 +613,25 @@ async function getPageText() {
       return el.innerText.replace(/\s+/g, ' ').trim();
     },
   });
+  return result;
+}
+
+async function getPageText() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) throw new Error('No active tab found.');
+
+  let result;
+  try {
+    result = await executeExtraction(tab.id);
+  } catch (err) {
+    if (err.message?.includes('Cannot access') || err.message?.includes('permission')) {
+      const granted = await chrome.permissions.request({ origins: ['<all_urls>'] }).catch(() => false);
+      if (!granted) throw new Error('Page access permission is required. Please grant it when prompted.');
+      result = await executeExtraction(tab.id);
+    } else {
+      throw err;
+    }
+  }
 
   if (!result) throw new Error('Could not extract text from this page.');
   const maxLen = parseInt(maxLengthInput.value, 10) || MAX_TEXT_LENGTH;
