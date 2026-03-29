@@ -391,6 +391,44 @@ body {
   background: none;
 }
 
+/* Selection badge */
+.selection-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.selection-badge__text {
+  font-size: 12px;
+  color: var(--accent);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selection-badge__clear {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.selection-badge__clear:hover {
+  opacity: 1;
+}
+
 /* Actions */
 .actions {
   display: flex;

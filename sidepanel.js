@@ -28,6 +28,9 @@ const settingsPanel     = document.getElementById('settings-panel');
 const historyPanel      = document.getElementById('history-panel');
 const historyList       = document.getElementById('history-list');
 const modesContainer    = document.getElementById('modes-container');
+const selectionBadge    = document.getElementById('selection-badge');
+const selectionChars    = document.getElementById('selection-chars');
+const btnClearSelection = document.getElementById('btn-clear-selection');
 const statusEl          = document.getElementById('status');
 const resultWrap        = document.getElementById('result-wrap');
 const resultEl          = document.getElementById('result');
@@ -37,6 +40,33 @@ const errorEl           = document.getElementById('error');
 let abortController = null;
 let slots = [];
 let activeSlotId = null;
+let pendingSelectionText = null;
+
+// --- Selection from context menu ---
+
+function showSelectionBadge(text) {
+  pendingSelectionText = text;
+  selectionChars.textContent = `${text.length} chars`;
+  selectionBadge.hidden = false;
+}
+
+function clearSelection() {
+  pendingSelectionText = null;
+  selectionBadge.hidden = true;
+  chrome.storage.session.remove('pendingSelection');
+}
+
+function loadPendingSelection() {
+  chrome.storage.session.get('pendingSelection', ({ pendingSelection }) => {
+    if (pendingSelection) showSelectionBadge(pendingSelection);
+  });
+}
+
+btnClearSelection.addEventListener('click', clearSelection);
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'selection-ready') loadPendingSelection();
+});
 
 // --- Language detection ---
 
@@ -52,8 +82,17 @@ const USER_LANG = (() => {
 // --- Default slots ---
 
 const DEFAULT_SLOTS = [
-  { id: 'slot_1', name: 'Summarize', locked: true, prompt: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}` },
+  { id: 'slot_1', name: 'Summarize', locked: true, model: '', maxLength: MAX_TEXT_LENGTH, markdown: false, prompt: `Summarize the following web page in 4–6 bullet points in ${USER_LANG}. Be specific.\n\n{{text}}` },
 ];
+
+// --- System prompt ---
+
+function getSystemPrompt() {
+  const md = markdownToggle?.checked
+    ? ' Format your response using Markdown (headers, bold, bullet lists where appropriate).'
+    : '';
+  return `You MUST always respond in ${USER_LANG}. Never use any other language in your response, regardless of the language of the input text.${md}`;
+}
 
 // --- Slot management ---
 
@@ -89,6 +128,10 @@ function setActiveSlot(id) {
   btnDeleteSlot.hidden = !!slot.locked;
   btnDeleteSlot.disabled = slots.length <= 1;
 
+  if (slot.model) modelSelect.value = slot.model;
+  maxLengthInput.value = slot.maxLength ?? MAX_TEXT_LENGTH;
+  markdownToggle.checked = !!slot.markdown;
+
   renderSlots();
   chrome.storage.local.set({ activeSlotId });
 }
@@ -99,7 +142,15 @@ function saveSlots() {
 
 function addSlot() {
   const n = slots.length + 1;
-  const slot = { id: `slot_${Date.now()}`, name: `Custom ${n}`, prompt: `{{text}}` };
+  const current = slots.find(s => s.id === activeSlotId);
+  const slot = {
+    id: `slot_${Date.now()}`,
+    name: `Custom ${n}`,
+    prompt: `{{text}}`,
+    model: current?.model || modelSelect.value,
+    maxLength: current?.maxLength ?? MAX_TEXT_LENGTH,
+    markdown: current?.markdown ?? false,
+  };
   slots.push(slot);
   setActiveSlot(slot.id);
   saveSlots();
@@ -127,11 +178,7 @@ function deleteActiveSlot() {
 function buildPrompt(pageText) {
   const slot = slots.find(s => s.id === activeSlotId);
   const template = slot?.prompt || '{{text}}';
-  let prompt = template.replace('{{text}}', pageText);
-  if (markdownToggle.checked) {
-    prompt += '\n\nFormat your response using Markdown (headers, bold, bullet lists where appropriate).';
-  }
-  return prompt;
+  return template.replace('{{text}}', pageText);
 }
 
 // --- Markdown parser ---
@@ -299,7 +346,8 @@ promptEditor.addEventListener('change', () => {
 });
 
 markdownToggle.addEventListener('change', () => {
-  chrome.storage.local.set({ markdown: markdownToggle.checked });
+  const slot = slots.find(s => s.id === activeSlotId);
+  if (slot) { slot.markdown = markdownToggle.checked; saveSlots(); }
 });
 
 btnDeleteSlot.addEventListener('click', deleteActiveSlot);
@@ -317,7 +365,8 @@ async function fetchModels() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const { models = [] } = await res.json();
 
-    const savedModel = await new Promise(r => chrome.storage.local.get('model', ({ model }) => r(model)));
+    const activeSlot = slots.find(s => s.id === activeSlotId);
+    const savedModel = activeSlot?.model || '';
 
     modelSelect.innerHTML = '';
     if (!models.length) {
@@ -336,7 +385,7 @@ async function fetchModels() {
     });
 
     if (!modelSelect.value && models.length) modelSelect.value = models[0].name;
-    chrome.storage.local.set({ model: modelSelect.value });
+    if (activeSlot) { activeSlot.model = modelSelect.value; saveSlots(); }
 
   } catch {
     modelSelect.innerHTML = `<option value="">Cannot reach Ollama</option>`;
@@ -349,25 +398,29 @@ async function fetchModels() {
 
 btnRefreshModels.addEventListener('click', fetchModels);
 modelSelect.addEventListener('change', () => {
-  chrome.storage.local.set({ model: modelSelect.value });
+  const slot = slots.find(s => s.id === activeSlotId);
+  if (slot) { slot.model = modelSelect.value; saveSlots(); }
 });
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'ollamaUrl', 'markdown', 'slots', 'activeSlotId', 'settingsOpen', 'maxLength'], (data) => {
-  markdownToggle.checked = !!data.markdown;
-
+chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown'], (data) => {
   const url = data.ollamaUrl || DEFAULT_OLLAMA_URL;
   urlInput.value = url;
   if (!data.ollamaUrl) chrome.storage.local.set({ ollamaUrl: DEFAULT_OLLAMA_URL });
 
-  maxLengthInput.value = data.maxLength || MAX_TEXT_LENGTH;
-
   applyTheme(data.theme || getSystemTheme());
 
   slots = data.slots?.length ? data.slots : DEFAULT_SLOTS.map(s => ({ ...s }));
-  const s1 = slots.find(s => s.id === 'slot_1');
-  if (s1) s1.locked = true;
+
+  // Ensure slot_1 is locked; migrate old global settings into slots that lack per-tab values
+  slots.forEach(slot => {
+    if (slot.id === 'slot_1') slot.locked = true;
+    if (!slot.model && data.model) slot.model = data.model;
+    if (slot.maxLength == null && data.maxLength) slot.maxLength = data.maxLength;
+    if (slot.markdown == null && data.markdown != null) slot.markdown = data.markdown;
+  });
+
   activeSlotId = data.activeSlotId || slots[0]?.id;
 
   // Open settings by default on first run; remember state after that
@@ -378,6 +431,7 @@ chrome.storage.local.get(['theme', 'ollamaUrl', 'markdown', 'slots', 'activeSlot
   renderSlots();
   setActiveSlot(activeSlotId);
   fetchModels();
+  loadPendingSelection();
 });
 
 urlInput.addEventListener('change', () => {
@@ -387,7 +441,8 @@ urlInput.addEventListener('change', () => {
 maxLengthInput.addEventListener('change', () => {
   const val = Math.min(50000, Math.max(1000, parseInt(maxLengthInput.value, 10) || MAX_TEXT_LENGTH));
   maxLengthInput.value = val;
-  chrome.storage.local.set({ maxLength: val });
+  const slot = slots.find(s => s.id === activeSlotId);
+  if (slot) { slot.maxLength = val; saveSlots(); }
 });
 
 // --- Helpers ---
@@ -461,17 +516,26 @@ async function run() {
   setGenerating(true);
 
   let pageText;
-  try {
-    pageText = await getPageText();
-  } catch (err) {
-    setError(`Failed to read page: ${err.message}`);
-    setGenerating(false);
-    return;
+  let textSource = 'page';
+  if (pendingSelectionText) {
+    pageText = pendingSelectionText;
+    textSource = 'selection';
+    clearSelection();
+  } else {
+    try {
+      pageText = await getPageText();
+    } catch (err) {
+      setError(`Failed to read page: ${err.message}`);
+      setGenerating(false);
+      return;
+    }
   }
 
   const model = modelSelect.value || DEFAULT_MODEL;
   const baseUrl = urlInput.value.trim() || DEFAULT_OLLAMA_URL;
   const prompt = buildPrompt(pageText);
+  console.log('[LLM] source:', textSource);
+  console.log('[LLM] prompt:', prompt);
   abortController = new AbortController();
   let fullText = '';
 
@@ -483,7 +547,8 @@ async function run() {
         model,
         stream: true,
         messages: [
-          { role: 'user', content: prompt },
+          { role: 'system', content: getSystemPrompt() },
+          { role: 'user',   content: prompt },
         ],
       }),
       signal: abortController.signal,

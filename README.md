@@ -39,12 +39,12 @@ Stop wasting minutes on fluff. Start with the summary.
 
 | Control | Description |
 |---|---|
-| Mode buttons | Switch between Summarize / Key Points / ELI5 / Translate |
+| Tabs | Switch between prompt tabs (Summarize + any custom tabs you add) |
 | **Run** | Extract page text and send to Ollama |
 | **Stop** | Cancel an in-progress generation |
 | **Clear** | Remove the current result |
 | **Copy** | Copy result to clipboard |
-| ⚙ Settings | Configure model, Ollama URL, prompt template, Markdown toggle |
+| ⚙ Settings | Configure model, max text length, Ollama URL, prompt template, Markdown toggle |
 | ⏱ History | Browse last 8 results |
 
 ## Configuration
@@ -57,33 +57,56 @@ Stop wasting minutes on fluff. Start with the summary.
 | Render Markdown | off | Toggle rich formatting in the result |
 | Max text length | 12 000 chars | Hard cap to prevent context overflow |
 
-## Prompt templates — the most important setting
+## The prompt is everything
 
-> **The quality of the result depends directly on the prompt you write.**
+> **90% of result quality comes from the prompt. Model choice is secondary.**
 
-The extension ships with one default tab — **Summarize**. You can add more tabs via the **+** button, name them however you like, and write a completely custom prompt for each.
+The extension ships with one default tab — **Summarize**. Add more tabs via the **+** button, name them however you like, write a completely custom prompt for each.
 
-Open ⚙ Settings → **Prompt template** to edit the prompt for the active tab. Use `{{text}}` as the placeholder for page content.
+Open ⚙ Settings → **Prompt template** to edit. Use `{{text}}` as the placeholder for page content.
 
-Tips:
-- Write the prompt in the language you want the output in
-- Be explicit: "Reply in --language--", "Use bullet points", "Keep it under 5 sentences"
-- If results are generic or off-topic, rewrite the prompt first before switching models
+### Why the prompt matters so much
+
+Models follow instructions — but only if those instructions are explicit. A vague prompt gets a vague result. A precise prompt that tells the model exactly what format, language, and depth you want will consistently outperform a better model with a weak prompt.
+
+If results are off: **rewrite the prompt first**, before switching models.
+
+### Prompt structure that works
+
+The most reliable pattern: give context first, then content, then the output instruction last. Models weight recent instructions more heavily.
+
+```
+Read the following text — it may be in any language.
+
+{{text}}
+
+Now write a summary in [your language] in 4–6 bullet points.
+Always respond in [your language], regardless of the language of the text above.
+```
+
+Replace `[your language]` with whatever you need. The same structure works for any task — key points, ELI5, action items, translation.
+
+### Tips
+
+- Be explicit about format: "Use bullet points", "Keep it under 5 sentences", "Start each point with a verb"
+- Put the output instruction **after** `{{text}}` — models follow the last instruction most reliably
+- If the model ignores your language instruction, try `qwen2.5` or `mistral` — they handle multilingual prompts better than some others
+- Create separate tabs for different tasks: one for quick summaries, one for deep analysis, one for extracting action items
 
 ## Model choice matters
 
-Different Ollama models produce **very different results** for the same prompt:
+Different models produce **very different results** for the same prompt:
 
 | Model | Notes |
 |---|---|
 | `llama3.2`, `llama3.1` | Good general-purpose summarization |
 | `mistral`, `mistral-nemo` | Strong at structured output |
 | `gemma2` | Concise and fast |
-| `qwen2.5` | Good multilingual support |
+| `qwen2.5` | Best multilingual support |
 | Small models (1–3B) | Fast but may produce shallow summaries |
 | Large models (7B+) | Better reasoning, slower on CPU |
 
-**Good results come from experimentation.** Try different models, tweak the prompt, and find the combination that works for your use case. There is no single "best" setting — it depends on your hardware, model, and the type of page you are summarizing.
+**There is no single best model.** Experiment with prompt + model combinations. A well-written prompt on a small model often beats a lazy prompt on a large one.
 
 ## Privacy
 
