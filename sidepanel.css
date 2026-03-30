@@ -470,9 +470,9 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   font-family: var(--font);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 5px 4px;
+  padding: 8px 6px;
   margin-bottom: -1px;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
@@ -493,21 +493,22 @@ body {
 
 .mode-btn--add {
   flex: 0 0 auto;
-  padding: 4px 11px;
-  font-size: 16px;
-  font-weight: 300;
-  color: var(--text-muted);
-  border: 1px dashed var(--border);
-  border-radius: 6px;
-  background: none;
-  margin-bottom: 3px;
-  align-self: center;
+  padding: 5px 10px;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--accent);
+  border: 1px dashed var(--accent);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: var(--bg-surface);
+  margin-bottom: -1px;
+  align-self: flex-end;
+  opacity: 0.75;
 }
 
 .mode-btn--add:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: none;
+  opacity: 1;
+  background: var(--bg-surface);
 }
 
 /* Selection badge */
