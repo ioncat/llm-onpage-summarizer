@@ -452,45 +452,56 @@ body {
 /* Mode selector */
 .modes {
   display: flex;
-  gap: 4px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 3px;
+  gap: 2px;
+  align-items: flex-end;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 4px 0 0;
 }
 
 .mode-btn {
   flex: 1;
-  background: none;
-  border: none;
-  border-radius: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
   color: var(--text-muted);
   cursor: pointer;
   font-family: var(--font);
   font-size: 11px;
   font-weight: 500;
   padding: 5px 4px;
+  margin-bottom: -1px;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
 
-.mode-btn:hover {
+.mode-btn:not(.active):hover {
+  background: var(--bg-input);
   color: var(--text);
 }
 
 .mode-btn.active {
-  background: var(--accent);
-  color: #fff;
+  background: var(--bg-input);
+  border-color: var(--border);
+  border-bottom-color: var(--bg-input);
+  color: var(--text);
+  font-weight: 600;
 }
 
 .mode-btn--add {
   flex: 0 0 auto;
-  padding: 5px 11px;
+  padding: 4px 11px;
   font-size: 16px;
   font-weight: 300;
   color: var(--text-muted);
   border: 1px dashed var(--border);
+  border-radius: 6px;
   background: none;
+  margin-bottom: 3px;
+  align-self: center;
 }
 
 .mode-btn--add:hover {
@@ -535,6 +546,18 @@ body {
 
 .selection-badge__clear:hover {
   opacity: 1;
+}
+
+/* Tab panel — content area that active tab merges into */
+.tab-panel {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Actions */
@@ -653,7 +676,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--bg-surface);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;

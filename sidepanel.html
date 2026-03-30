@@ -99,28 +99,30 @@
     <!-- Dynamic slot tabs — rendered by JS -->
     <div class="modes" id="modes-container"></div>
 
-    <div id="selection-badge" class="selection-badge" hidden>
-      <span class="selection-badge__text">Selected text · <span id="selection-chars"></span></span>
-      <button id="btn-clear-selection" class="selection-badge__clear" title="Use full page instead">✕</button>
-    </div>
-
-    <div class="actions">
-      <button id="btn-summarize" class="btn btn--primary">Run</button>
-      <button id="btn-stop" class="btn btn--danger" hidden>Stop</button>
-      <button id="btn-clear" class="btn btn--danger-soft">Clear</button>
-    </div>
-
-    <div id="status" class="status" hidden></div>
-
-    <div id="result-wrap" class="result-wrap" hidden>
-      <div id="result" class="result"></div>
-      <div class="result-footer">
-        <span id="char-count" class="char-count"></span>
-        <button id="btn-copy" class="btn btn--accent-soft">Copy</button>
+    <div class="tab-panel">
+      <div id="selection-badge" class="selection-badge" hidden>
+        <span class="selection-badge__text">Selected text · <span id="selection-chars"></span></span>
+        <button id="btn-clear-selection" class="selection-badge__clear" title="Use full page instead">✕</button>
       </div>
-    </div>
 
-    <div id="error" class="error" hidden></div>
+      <div class="actions">
+        <button id="btn-summarize" class="btn btn--primary">Run</button>
+        <button id="btn-stop" class="btn btn--danger" hidden>Stop</button>
+        <button id="btn-clear" class="btn btn--danger-soft">Clear</button>
+      </div>
+
+      <div id="status" class="status" hidden></div>
+
+      <div id="result-wrap" class="result-wrap" hidden>
+        <div id="result" class="result"></div>
+        <div class="result-footer">
+          <span id="char-count" class="char-count"></span>
+          <button id="btn-copy" class="btn btn--accent-soft">Copy</button>
+        </div>
+      </div>
+
+      <div id="error" class="error" hidden></div>
+    </div>
 
   </div>
   <script src="sidepanel.js"></script>
