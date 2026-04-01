@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Summarizer — Full View</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a1a1a;
+      color: #e8e8e8;
+      min-height: 100vh;
+      padding: 40px 20px 60px;
+    }
+
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #3a3a3a;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #e8e8e8;
+    }
+
+    .badge {
+      font-size: 11px;
+      color: #888;
+      background: #2e2e2e;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #3a3a3a;
+      background: #2e2e2e;
+      color: #888;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    button:hover {
+      color: #e8e8e8;
+      border-color: #7c6af7;
+    }
+
+    .content {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #e8e8e8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Markdown styles */
+    .content h1, .content h2, .content h3 {
+      margin: 1.4em 0 0.5em;
+      line-height: 1.3;
+    }
+    .content h1 { font-size: 1.5em; }
+    .content h2 { font-size: 1.25em; }
+    .content h3 { font-size: 1.1em; }
+    .content p { margin: 0.75em 0; }
+    .content ul, .content ol { padding-left: 1.5em; margin: 0.75em 0; }
+    .content li { margin: 0.3em 0; }
+    .content strong { font-weight: 600; }
+    .content em { font-style: italic; }
+    .content code {
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 0.88em;
+      background: #2e2e2e;
+      border: 1px solid #3a3a3a;
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+    .content pre {
+      background: #2e2e2e;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 1em 0;
+      overflow-x: auto;
+    }
+    .content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 13px;
+    }
+    .content blockquote {
+      border-left: 3px solid #7c6af7;
+      padding-left: 14px;
+      color: #aaa;
+      margin: 1em 0;
+    }
+    .content hr {
+      border: none;
+      border-top: 1px solid #3a3a3a;
+      margin: 1.5em 0;
+    }
+
+    .empty {
+      color: #555;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="title">Result</h1>
+      <div class="actions">
+        <span class="badge" id="char-count"></span>
+        <button id="btn-copy">Copy</button>
+        <button id="btn-print" onclick="window.print()">Print</button>
+      </div>
+    </header>
+    <div id="content" class="content"></div>
+  </div>
+  <script src="viewer.js"></script>
+</body>
+</html>

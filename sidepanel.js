@@ -21,6 +21,10 @@ const modelManager      = document.getElementById('model-manager');
 const btnSummarize      = document.getElementById('btn-summarize');
 const btnStop           = document.getElementById('btn-stop');
 const btnCopy           = document.getElementById('btn-copy');
+const btnExpand         = document.getElementById('btn-expand');
+const btnViewerMode     = document.getElementById('btn-viewer-mode');
+const viewerMenu        = document.getElementById('viewer-menu');
+const viewerMenuItems   = viewerMenu.querySelectorAll('.viewer-menu__item');
 const btnClear          = document.getElementById('btn-clear');
 const markdownToggle    = document.getElementById('markdown-toggle');
 const btnTheme          = document.getElementById('btn-theme');
@@ -46,6 +50,8 @@ let activeSlotId = null;
 let pendingSelectionText = null;
 let modelList = [];
 let modelMeta = {};
+let currentResultText = '';
+let viewerMode = 'popup';
 
 // --- Selection from context menu ---
 
@@ -543,7 +549,8 @@ modelSelect.addEventListener('change', () => {
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown', 'modelMeta'], (data) => {
+chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown', 'modelMeta', 'viewerMode'], (data) => {
+  if (data.viewerMode) viewerMode = data.viewerMode;
   modelMeta = data.modelMeta || {};
   const url = data.ollamaUrl || DEFAULT_OLLAMA_URL;
   urlInput.value = url;
@@ -612,29 +619,87 @@ function setGenerating(active) {
 // --- Extract page text ---
 
 async function executeExtraction(tabId) {
+  // Inject Readability into the page's isolated world (Level 1)
+  await chrome.scripting.executeScript({ target: { tabId }, files: ['lib/Readability.js'] });
+
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId },
     func: () => {
-      const candidates = [
+      // ── Level 1: Mozilla Readability ─────────────────────────────
+      try {
+        const clone = document.cloneNode(true);
+        // eslint-disable-next-line no-undef
+        const article = new Readability(clone).parse();
+        if (article?.textContent?.trim().length > 300) {
+          return article.textContent.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+        }
+      } catch (_) {}
+
+      // ── Level 2: improved custom logic ───────────────────────────
+      const CANDIDATES = [
         'article', 'main', '[role="main"]',
         '.post-content', '.article-content', '.entry-content',
         '.content', '.post', '.article',
         '#content', '#main', '#article',
       ];
+      const JUNK = [
+        'nav', 'header', 'footer', 'aside', 'script', 'style', 'noscript',
+        '[role="navigation"]', '[role="banner"]', '[role="complementary"]',
+        '.ad', '.ads', '.advertisement', '.cookie-banner', '.cookie-notice',
+        '.popup', '.modal', '.social-share', '.share-buttons',
+        '.related-posts', '.recommended', '.sidebar', '.widget', '.comments',
+        '[aria-hidden="true"]',
+      ].join(',');
+      const BLOCK_TAGS = new Set([
+        'P', 'DIV', 'SECTION', 'ARTICLE', 'BLOCKQUOTE', 'PRE',
+        'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+        'LI', 'TR', 'TH', 'TD', 'BR', 'HR',
+      ]);
 
-      let el = null;
-      for (const selector of candidates) {
-        const found = document.querySelector(selector);
-        if (found && found.innerText.trim().length > 200) { el = found; break; }
+      function serialize(el) {
+        let out = '';
+        function walk(node) {
+          if (node.nodeType === 3) { out += node.textContent; return; }
+          if (node.nodeType !== 1) return;
+          const tag = node.tagName;
+          if (BLOCK_TAGS.has(tag) && out.length && !out.endsWith('\n')) out += '\n';
+          if (/^H[1-6]$/.test(tag)) out += '\n';
+          if (tag === 'LI') out += '- ';
+          for (const child of node.childNodes) walk(child);
+          if (BLOCK_TAGS.has(tag) && !out.endsWith('\n')) out += '\n';
+        }
+        walk(el);
+        return out.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
       }
 
-      if (!el) {
-        const clone = document.body.cloneNode(true);
-        clone.querySelectorAll('nav, header, footer, aside, script, style, noscript, [role="navigation"], [role="banner"], [role="complementary"]').forEach(n => n.remove());
-        return clone.innerText.replace(/\s+/g, ' ').trim();
+      // pick the longest candidate, not the first
+      let best = null;
+      let bestLen = 200;
+      for (const sel of CANDIDATES) {
+        for (const el of document.querySelectorAll(sel)) {
+          const len = el.innerText?.trim().length ?? 0;
+          if (len > bestLen) { best = el; bestLen = len; }
+        }
       }
 
-      return el.innerText.replace(/\s+/g, ' ').trim();
+      if (best) {
+        const clone = best.cloneNode(true);
+        clone.querySelectorAll(JUNK).forEach(n => n.remove());
+        return serialize(clone);
+      }
+
+      // full-body fallback
+      const bodyClone = document.body.cloneNode(true);
+      bodyClone.querySelectorAll(JUNK).forEach(n => n.remove());
+      const bodyText = serialize(bodyClone);
+      if (bodyText.length > 200) return bodyText;
+
+      // ── Level 3: meta tags ────────────────────────────────────────
+      const title = document.title?.trim() ?? '';
+      const desc =
+        document.querySelector('meta[name="description"]')?.content?.trim() ||
+        document.querySelector('meta[property="og:description"]')?.content?.trim() || '';
+      return [title, desc].filter(Boolean).join('\n\n');
     },
   });
   return result;
@@ -726,6 +791,7 @@ async function run() {
         const token = json.message?.content ?? json.response ?? '';
         if (token) {
           fullText += token;
+          currentResultText = fullText;
           renderResult(fullText);
           charCountEl.textContent = `${fullText.length} chars`;
           resultEl.scrollTop = resultEl.scrollHeight;
@@ -789,6 +855,49 @@ btnClear.addEventListener('click', () => {
   resultWrap.hidden = true;
   errorEl.hidden = true;
 });
+
+function openViewer() {
+  if (!currentResultText) return;
+  const slot = slots.find(s => s.id === activeSlotId);
+  chrome.storage.session.set({
+    viewerContent: {
+      text: currentResultText,
+      markdown: markdownToggle.checked,
+      title: slot?.name || 'Result'
+    }
+  }, () => {
+    if (viewerMode === 'popup') {
+      chrome.windows.create({ url: chrome.runtime.getURL('viewer.html'), type: 'popup', width: 820, height: 680 });
+    } else {
+      chrome.tabs.create({ url: chrome.runtime.getURL('viewer.html') });
+    }
+  });
+}
+
+function updateViewerMenuActive() {
+  viewerMenuItems.forEach(item => {
+    item.classList.toggle('active', item.dataset.mode === viewerMode);
+  });
+}
+
+btnExpand.addEventListener('click', openViewer);
+
+btnViewerMode.addEventListener('click', (e) => {
+  e.stopPropagation();
+  viewerMenu.hidden = !viewerMenu.hidden;
+  updateViewerMenuActive();
+});
+
+viewerMenuItems.forEach(item => {
+  item.addEventListener('click', () => {
+    viewerMode = item.dataset.mode;
+    chrome.storage.local.set({ viewerMode });
+    updateViewerMenuActive();
+    viewerMenu.hidden = true;
+  });
+});
+
+document.addEventListener('click', () => { viewerMenu.hidden = true; });
 
 btnCopy.addEventListener('click', () => {
   const text = resultEl.textContent;

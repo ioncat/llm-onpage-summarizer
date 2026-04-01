@@ -715,6 +715,60 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.viewer-controls {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.btn--icon-sm {
+  padding: 4px 6px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.viewer-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  min-width: 170px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.viewer-menu__item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.viewer-menu__item:hover {
+  background: var(--bg-input);
+  color: var(--text);
+}
+
+.viewer-menu__item.active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.viewer-menu__item.active::before {
+  content: '✓ ';
+}
+
 .char-count {
   font-size: 11px;
   color: var(--text-muted);
