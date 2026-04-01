@@ -53,6 +53,7 @@ Stop wasting minutes on fluff. Start with the summary.
 | **Stop** | Cancel an in-progress generation |
 | **Clear** | Remove the current result |
 | **Copy** | Copy result to clipboard |
+| **⧉** | Open result in a full-view reader (popup window or new tab) — click **⋯** next to it to switch mode |
 | ⚙ Settings | Configure model, max text length, Ollama URL, prompt template, Markdown toggle |
 | ⏱ History | Browse last 8 results |
 

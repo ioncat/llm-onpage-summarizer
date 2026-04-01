@@ -73,6 +73,20 @@
 
 ---
 
+## Phase 3.7 — UI improvements
+> Goal: visual polish and reading comfort
+
+| # | Task | Status |
+|---|------|--------|
+| 3.20 | Redesign prompt tabs as classic browser-style tabs (tab strip, active tab merges with panel) | ✅ |
+| 3.21 | Tab panel card wrapping actions + result area | ✅ |
+| 3.22 | Full-view viewer: open result in popup window or new tab (⧉ button) | ✅ |
+| 3.23 | Viewer mode toggle (⋯ menu): popup vs new tab, choice persisted | ✅ |
+
+**Phase 3.7 total: ~2.5 h**
+
+---
+
 ## Phase 4 — Multi-provider support (planned)
 > Goal: support cloud and alternative LLM providers alongside Ollama
 
@@ -105,13 +119,36 @@
 
 ---
 
+## Phase 5 — Content extraction improvements (planned)
+> Goal: replace naive CSS-selector extraction with a robust, tiered pipeline
+
+### Architecture: three-level fallback
+
+```
+Level 1: Mozilla Readability (primary)
+Level 2: Improved custom logic (fallback)
+Level 3: Meta tags (last resort)
+```
+
+| # | Task | Status |
+|---|------|--------|
+| 5.1 | Add `Readability.js` to `lib/` and declare in `manifest.json` `web_accessible_resources` | ✅ |
+| 5.2 | Level 1 — run Readability on a cloned document; use result if `textContent.length > 300` | ✅ |
+| 5.3 | Level 2 — collect *all* selector candidates, pick the longest one (not the first) | ✅ |
+| 5.4 | Level 2 — strip garbage inside the chosen element: `.ad`, `.cookie-banner`, `.social-share`, `[aria-hidden="true"]`, `.related-posts`, etc. | ✅ |
+| 5.5 | Level 2 — structured serialization: preserve `\n\n` between block elements, `- ` before `<li>`, newlines after headings | ✅ |
+| 5.6 | Level 3 — collect `<title>` + `meta[name=description]` + `meta[property="og:description"]` as minimal context | ✅ |
+| 5.7 | Smoke-test on edge cases: Medium/Substack/Habr, SPA, paywalled page, GitHub, YouTube | ⬜ |
+
+---
+
 ## Other improvements (planned)
 
 | # | Idea | Priority |
 |---|------|----------|
-| 5.1 | LM Studio / OpenAI-compatible local provider support (`/v1/models`, `/v1/chat/completions`, SSE streaming) | medium |
-| 5.2 | Provider abstraction layer — clean separation of Ollama vs OpenAI-compatible API logic | medium |
-| 5.3 | Editable system prompt in settings | medium |
+| 6.1 | LM Studio / OpenAI-compatible local provider support (`/v1/models`, `/v1/chat/completions`, SSE streaming) | medium |
+| 6.2 | Provider abstraction layer — clean separation of Ollama vs OpenAI-compatible API logic | medium |
+| 6.3 | Editable system prompt in settings | medium |
 
 ---
 
@@ -124,4 +161,6 @@
 | Phase 3 — Extras | ✅ | ~2.5 h |
 | Phase 3.5 — Settings & Prompt | ✅ | ~30 min |
 | Phase 3.6 — Quality & reliability | ✅ | ~2 h |
-| **Total** | | **~7 h** |
+| Phase 3.7 — UI improvements | ✅ | ~2.5 h |
+| Phase 5 — Content extraction | ⬜ | — |
+| **Total** | | **~9.5 h** |
