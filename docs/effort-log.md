@@ -16,6 +16,7 @@ Time analysis based on git history (commit timestamps).
 | 2026-03-29 | 12 | Phase 3.6: context menu selection, per-tab settings, model ratings + hide, permissions cleanup, NDJSON streaming fix, README updates | ~3 h |
 | 2026-03-30 | 2 | Phase 3.7 (part 1): classic browser-style tab strip redesign, tab panel card, add-tab button styling | ~30 min |
 | 2026-04-01 | 1 | Phase 3.7 (part 2): full-view viewer (popup/tab), mode toggle with persistence | ~2 h |
+| 2026-04-02 | — | Phase 3.7 (part 3): ⧉/⋯ moved to result header, auto-open when done flag | ~1 h |
 
 *Table updated after each session.*
 
@@ -109,3 +110,15 @@ Then update the tables above manually (or ask Claude).
 | Completed | Full-view viewer (viewer.html + viewer.js), expand button (⧉) in result footer, popup/tab mode toggle (⋯ menu) with persistence, docs update |
 | Commits | 1 |
 | Time | ~2 h |
+
+---
+
+## Session 6 — 2026-04-02
+
+| Parameter | Value |
+|-----------|-------|
+| Date | 2026-04-02 |
+| Status | ✅ Phase 3.7 (part 3) |
+| Completed | ⧉ and ⋯ moved to top-right of result block (result-header), auto-open when done toggle in ⋯ menu with persistence |
+| Commits | — |
+| Time | ~1 h |

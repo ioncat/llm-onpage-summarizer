@@ -715,6 +715,13 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.result-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
 .viewer-controls {
   position: relative;
   display: flex;
@@ -730,7 +737,7 @@ body {
 
 .viewer-menu {
   position: absolute;
-  bottom: calc(100% + 6px);
+  top: calc(100% + 6px);
   right: 0;
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -767,6 +774,12 @@ body {
 
 .viewer-menu__item.active::before {
   content: '✓ ';
+}
+
+.viewer-menu__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
 }
 
 .char-count {

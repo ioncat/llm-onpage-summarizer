@@ -52,8 +52,9 @@ Stop wasting minutes on fluff. Start with the summary.
 | Right-click → **Analyze with LLM Summarizer** | Select any text on the page, right-click, and send just that fragment — useful when you want to analyze a specific section rather than the whole page |
 | **Stop** | Cancel an in-progress generation |
 | **Clear** | Remove the current result |
-| **Copy** | Copy result to clipboard |
-| **⧉** | Open result in a full-view reader (popup window or new tab) — click **⋯** next to it to switch mode |
+| **Copy** | Copy result to clipboard (bottom of result area) |
+| **⧉** | Open result in a full-view reader — located in the top-right corner of the result area |
+| **⋯** | Choose how the viewer opens: **Open in popup window** or **Open in new tab**. Toggle **Auto-open when done** to have the viewer open automatically after every generation — no click needed |
 | ⚙ Settings | Configure model, max text length, Ollama URL, prompt template, Markdown toggle |
 | ⏱ History | Browse last 8 results |
 

@@ -114,18 +114,22 @@
       <div id="status" class="status" hidden></div>
 
       <div id="result-wrap" class="result-wrap" hidden>
-        <div id="result" class="result"></div>
-        <div class="result-footer">
-          <span id="char-count" class="char-count"></span>
-          <button id="btn-copy" class="btn btn--accent-soft">Copy</button>
+        <div class="result-header">
           <div class="viewer-controls">
             <button id="btn-expand" class="btn btn--ghost" title="Open in full view">⧉</button>
             <button id="btn-viewer-mode" class="btn btn--ghost btn--icon-sm" title="Choose how to open">⋯</button>
             <div id="viewer-menu" class="viewer-menu" hidden>
               <button class="viewer-menu__item" data-mode="popup">Open in popup window</button>
               <button class="viewer-menu__item" data-mode="tab">Open in new tab</button>
+              <div class="viewer-menu__divider"></div>
+              <button class="viewer-menu__item" id="btn-auto-open">Auto-open when done</button>
             </div>
           </div>
+        </div>
+        <div id="result" class="result"></div>
+        <div class="result-footer">
+          <span id="char-count" class="char-count"></span>
+          <button id="btn-copy" class="btn btn--accent-soft">Copy</button>
         </div>
       </div>
 

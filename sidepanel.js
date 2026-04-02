@@ -24,7 +24,8 @@ const btnCopy           = document.getElementById('btn-copy');
 const btnExpand         = document.getElementById('btn-expand');
 const btnViewerMode     = document.getElementById('btn-viewer-mode');
 const viewerMenu        = document.getElementById('viewer-menu');
-const viewerMenuItems   = viewerMenu.querySelectorAll('.viewer-menu__item');
+const viewerMenuItems   = viewerMenu.querySelectorAll('.viewer-menu__item[data-mode]');
+const btnAutoOpen       = document.getElementById('btn-auto-open');
 const btnClear          = document.getElementById('btn-clear');
 const markdownToggle    = document.getElementById('markdown-toggle');
 const btnTheme          = document.getElementById('btn-theme');
@@ -52,6 +53,7 @@ let modelList = [];
 let modelMeta = {};
 let currentResultText = '';
 let viewerMode = 'popup';
+let viewerAutoOpen = false;
 
 // --- Selection from context menu ---
 
@@ -549,8 +551,9 @@ modelSelect.addEventListener('change', () => {
 
 // --- Load saved settings ---
 
-chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown', 'modelMeta', 'viewerMode'], (data) => {
+chrome.storage.local.get(['theme', 'ollamaUrl', 'slots', 'activeSlotId', 'settingsOpen', 'model', 'maxLength', 'markdown', 'modelMeta', 'viewerMode', 'viewerAutoOpen'], (data) => {
   if (data.viewerMode) viewerMode = data.viewerMode;
+  if (data.viewerAutoOpen) viewerAutoOpen = data.viewerAutoOpen;
   modelMeta = data.modelMeta || {};
   const url = data.ollamaUrl || DEFAULT_OLLAMA_URL;
   urlInput.value = url;
@@ -814,7 +817,10 @@ async function run() {
       lines.forEach(processLine);
     }
 
-    if (fullText) saveToHistory(fullText);
+    if (fullText) {
+      saveToHistory(fullText);
+      if (viewerAutoOpen) openViewer();
+    }
 
   } catch (err) {
     setStatus('');
@@ -878,6 +884,7 @@ function updateViewerMenuActive() {
   viewerMenuItems.forEach(item => {
     item.classList.toggle('active', item.dataset.mode === viewerMode);
   });
+  btnAutoOpen.classList.toggle('active', viewerAutoOpen);
 }
 
 btnExpand.addEventListener('click', openViewer);
@@ -895,6 +902,13 @@ viewerMenuItems.forEach(item => {
     updateViewerMenuActive();
     viewerMenu.hidden = true;
   });
+});
+
+btnAutoOpen.addEventListener('click', () => {
+  viewerAutoOpen = !viewerAutoOpen;
+  chrome.storage.local.set({ viewerAutoOpen });
+  updateViewerMenuActive();
+  viewerMenu.hidden = true;
 });
 
 document.addEventListener('click', () => { viewerMenu.hidden = true; });

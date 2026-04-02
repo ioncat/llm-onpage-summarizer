@@ -82,8 +82,10 @@
 | 3.21 | Tab panel card wrapping actions + result area | ✅ |
 | 3.22 | Full-view viewer: open result in popup window or new tab (⧉ button) | ✅ |
 | 3.23 | Viewer mode toggle (⋯ menu): popup vs new tab, choice persisted | ✅ |
+| 3.24 | Move ⧉ and ⋯ to top-right corner of result block (no scrolling needed) | ✅ |
+| 3.25 | Auto-open when done: viewer opens automatically after generation completes | ✅ |
 
-**Phase 3.7 total: ~2.5 h**
+**Phase 3.7 total: ~3 h**
 
 ---
 
