@@ -68,23 +68,23 @@ Stop wasting minutes on fluff. Start with the summary.
 | Render Markdown | off | Toggle rich formatting in the result |
 | Max text length | 12 000 chars | Hard cap to prevent context overflow |
 
-## The prompt is everything
+## Prompt and model — both matter
 
-> **Result quality depends on two things equally: the model you choose and the prompt you write. Neither alone is enough.**
+> **Result quality depends on two things: the model you choose and the prompt you write. Neither alone is enough.**
 
 The extension ships with one default tab — **Summarize**. Add more tabs via the **+** button, name them however you like, write a completely custom prompt for each.
 
 Open ⚙ Settings → **Prompt template** to edit. Use `{{text}}` as the placeholder for page content.
 
-### Why the prompt matters so much
+### Why the prompt matters
 
-Models follow instructions — but only if those instructions are explicit. A vague prompt gets a vague result. A precise prompt that tells the model exactly what format, language, and depth you want will consistently outperform a better model with a weak prompt.
+More explicit instructions tend to produce more focused results. A prompt that specifies format, language, and scope gives the model clearer direction than a vague one.
 
-If results are off: **rewrite the prompt first**, before switching models.
+If results aren't what you expected, adjusting the prompt is often a good first step — though switching models may help just as much.
 
-### Prompt structure that works
+### A prompt structure to start with
 
-The most reliable pattern: give context first, then content, then the output instruction last. Models weight recent instructions more heavily.
+One pattern that tends to work well: give context first, then content, then the output instruction last.
 
 ```
 Read the following text — it may be in any language.
@@ -95,29 +95,29 @@ Now write a summary in [your language] in 4–6 bullet points.
 Always respond in [your language], regardless of the language of the text above.
 ```
 
-Replace `[your language]` with whatever you need. The same structure works for any task — key points, ELI5, action items, translation.
+Replace `[your language]` with whatever you need. You can adapt this structure for other tasks — key points, action items, translation, etc.
 
 ### Tips
 
 - Be explicit about format: "Use bullet points", "Keep it under 5 sentences", "Start each point with a verb"
-- Put the output instruction **after** `{{text}}` — models follow the last instruction most reliably
-- If the model ignores your language instruction, try `qwen2.5` or `mistral` — they handle multilingual prompts better than some others
+- Try putting the output instruction **after** `{{text}}` — some models respond better to instructions placed last
+- If a model ignores your language instruction, trying `qwen2.5` or `mistral` may help — multilingual behavior varies across models
 - Create separate tabs for different tasks: one for quick summaries, one for deep analysis, one for extracting action items
 
 ## Model choice matters
 
-Different models produce **very different results** for the same prompt:
+Different models can produce quite different results for the same prompt:
 
 | Model | Notes |
 |---|---|
-| `llama3.2`, `llama3.1` | Good general-purpose summarization |
-| `mistral`, `mistral-nemo` | Strong at structured output |
-| `gemma2` | Concise and fast |
-| `qwen2.5` | Best multilingual support |
-| Small models (1–3B) | Fast but may produce shallow summaries |
-| Large models (7B+) | Better reasoning, slower on CPU |
+| `llama3.2`, `llama3.1` | General-purpose, good starting point |
+| `mistral`, `mistral-nemo` | Often performs well on structured output |
+| `gemma2` | Tends to be concise and fast |
+| `qwen2.5` | Worth trying for multilingual prompts |
+| Small models (1–3B) | Faster, may produce shallower results |
+| Large models (7B+) | Generally stronger reasoning, slower on CPU |
 
-**There is no single best model.** Experiment with prompt + model combinations. A well-written prompt on a small model often beats a lazy prompt on a large one.
+Results vary by hardware, model version, and prompt. Experimenting with different combinations is the most reliable way to find what works for your use case.
 
 ### Managing your model list
 
