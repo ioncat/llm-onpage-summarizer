@@ -33,7 +33,7 @@ Stop wasting minutes on fluff. Start with the summary.
 
 - Chrome 114+ (side panel API)
 - [Ollama](https://ollama.com) running locally on `http://localhost:11434`
-- At least one model pulled, e.g.: `ollama pull llama3.2`
+- At least one model pulled, e.g.: `ollama pull <model-name>`
 
 ## Installation
 
@@ -101,23 +101,12 @@ Replace `[your language]` with whatever you need. You can adapt this structure f
 
 - Be explicit about format: "Use bullet points", "Keep it under 5 sentences", "Start each point with a verb"
 - Try putting the output instruction **after** `{{text}}` — some models respond better to instructions placed last
-- If a model ignores your language instruction, trying `qwen2.5` or `mistral` may help — multilingual behavior varies across models
+- If a model ignores your language instruction, try a different one — multilingual behavior varies across models
 - Create separate tabs for different tasks: one for quick summaries, one for deep analysis, one for extracting action items
 
 ## Model choice matters
 
-Different models can produce quite different results for the same prompt:
-
-| Model | Notes |
-|---|---|
-| `llama3.2`, `llama3.1` | General-purpose, good starting point |
-| `mistral`, `mistral-nemo` | Often performs well on structured output |
-| `gemma2` | Tends to be concise and fast |
-| `qwen2.5` | Worth trying for multilingual prompts |
-| Small models (1–3B) | Faster, may produce shallower results |
-| Large models (7B+) | Generally stronger reasoning, slower on CPU |
-
-Results vary by hardware, model version, and prompt. Experimenting with different combinations is the most reliable way to find what works for your use case.
+Different models can produce quite different results for the same prompt. Results vary by hardware, model version, and prompt. Experimenting with different combinations is the most reliable way to find what works for your use case.
 
 ### Managing your model list
 

@@ -891,25 +891,28 @@ btnClear.addEventListener('click', () => {
 function openViewer() {
   if (!currentResultText) return;
   const slot = slots.find(s => s.id === activeSlotId);
-  chrome.storage.session.set({
-    viewerContent: {
-      text: currentResultText,
-      markdown: markdownToggle.checked,
-      title: slot?.name || 'Result'
-    }
-  }, () => {
-    if (viewerMode === 'popup') {
-      chrome.windows.create({
-        url: chrome.runtime.getURL('viewer.html'),
-        type: 'popup',
-        width: 820,
-        height: 680,
-        left: Math.round(screen.width * 0.75 - 820 / 2),
-        top: Math.round((screen.height - 680) / 2)
-      });
-    } else {
-      chrome.tabs.create({ url: chrome.runtime.getURL('viewer.html') });
-    }
+  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    chrome.storage.session.set({
+      viewerContent: {
+        text: currentResultText,
+        markdown: markdownToggle.checked,
+        title: slot?.name || 'Result',
+        url: tab?.url || ''
+      }
+    }, () => {
+      if (viewerMode === 'popup') {
+        chrome.windows.create({
+          url: chrome.runtime.getURL('viewer.html'),
+          type: 'popup',
+          width: 820,
+          height: 680,
+          left: Math.round(screen.width * 0.75 - 820 / 2),
+          top: Math.round((screen.height - 680) / 2)
+        });
+      } else {
+        chrome.tabs.create({ url: chrome.runtime.getURL('viewer.html') });
+      }
+    });
   });
 }
 
@@ -949,8 +952,11 @@ document.addEventListener('click', () => { viewerMenu.hidden = true; });
 btnCopy.addEventListener('click', () => {
   const text = resultEl.textContent;
   if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    btnCopy.textContent = 'Copied!';
-    setTimeout(() => { btnCopy.textContent = 'Copy'; }, 1500);
+  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    const source = tab?.url ? `\n\nSource: ${tab.url}` : '';
+    navigator.clipboard.writeText(text + source).then(() => {
+      btnCopy.textContent = 'Copied!';
+      setTimeout(() => { btnCopy.textContent = 'Copy'; }, 1500);
+    });
   });
 });

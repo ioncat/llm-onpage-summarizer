@@ -101,11 +101,11 @@ chrome.storage.session.get('viewerContent', ({ viewerContent }) => {
     return;
   }
 
-  const { text, markdown, title } = viewerContent;
+  const { text, markdown, title, url } = viewerContent;
 
   titleEl.textContent = title || 'Result';
   document.title = `${title || 'Result'} — LLM Summarizer`;
-  charCountEl.textContent = `${text.length} chars`;
+  charCountEl.textContent = `${text.length} chars · ${text.trim().split(/\s+/).filter(Boolean).length} words`;
 
   if (markdown) {
     contentEl.innerHTML = parseMarkdown(text);
@@ -115,7 +115,8 @@ chrome.storage.session.get('viewerContent', ({ viewerContent }) => {
   }
 
   btnCopy.addEventListener('click', () => {
-    navigator.clipboard.writeText(text).then(() => {
+    const source = url ? `\n\nSource: ${url}` : '';
+    navigator.clipboard.writeText(text + source).then(() => {
       btnCopy.textContent = 'Copied!';
       setTimeout(() => { btnCopy.textContent = 'Copy'; }, 1500);
     });
