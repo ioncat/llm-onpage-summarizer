@@ -339,7 +339,7 @@ function renderHistory() {
       `;
       el.addEventListener('click', () => {
         resultEl.textContent = item.text;
-        charCountEl.textContent = `${item.text.length} chars`;
+        charCountEl.textContent = `${item.text.length} chars · ${item.text.trim().split(/\s+/).filter(Boolean).length} words`;
         resultWrap.hidden = false;
         historyPanel.hidden = true;
         btnHistory.style.color = '';
@@ -822,7 +822,7 @@ async function run() {
           fullText += token;
           currentResultText = fullText;
           renderResult(fullText);
-          charCountEl.textContent = `${fullText.length} chars`;
+          charCountEl.textContent = `${fullText.length} chars · ${fullText.trim().split(/\s+/).filter(Boolean).length} words`;
           resultEl.scrollTop = resultEl.scrollHeight;
         }
       } catch {
