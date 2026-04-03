@@ -1,6 +1,6 @@
 # llm-onpage-summarizer
 
-A Chrome extension that summarizes the current web page using a **locally running LLM via [Ollama](https://ollama.com)**. No cloud, no API keys, fully private — everything runs on your machine.
+A Chrome extension that summarizes the current web page using a **local LLM via [Ollama](https://ollama.com)**. No cloud required, no API keys — you choose where your content is processed.
 
 ## Why bother?
 
@@ -9,7 +9,7 @@ You shouldn't read everything that lands in your browser. Most content isn't wor
 - **Cut the Noise** — get the gist of articles, logs, or tickets instantly.
 - **Zero Friction** — no tab switching, no copy-pasting.
 - **Decide Faster** — see the core idea first, then decide if it's worth the deep dive.
-- **Your Data, Your Call** — everything runs locally via Ollama. Your content never leaves your machine.
+- **Your Data, Your Call** — you choose where your content is processed. With local models, it never leaves your machine.
 
 Stop wasting minutes on fluff. Start with the summary.
 
@@ -132,7 +132,7 @@ Ratings and hidden state are saved locally in the extension and survive restarts
 
 ## Privacy
 
-While using Ollama, all processing is local. The extension never sends data to any external server. Page text is only sent to `localhost`.
+The extension sends page content only to the Ollama endpoint configured in settings (`localhost` by default). Where that content goes from there depends on the model you choose — local models keep everything on your machine, while cloud-backed models route it to the respective provider. You are in control of that choice.
 
 ## License
 
