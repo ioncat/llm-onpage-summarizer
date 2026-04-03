@@ -13,7 +13,7 @@ You shouldn't read everything that lands in your browser. Most content isn't wor
 
 Stop wasting minutes on fluff. Start with the summary.
 
-![LLM Onpage Summarizer demo](docs/Summariser.gif)
+![LLM Onpage Summarizer demo](docs/Summarizer_1.gif)
 
 ## How it works
 
