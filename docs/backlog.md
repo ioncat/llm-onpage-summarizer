@@ -84,8 +84,24 @@
 | 3.23 | Viewer mode toggle (⋯ menu): popup vs new tab, choice persisted | ✅ |
 | 3.24 | Move ⧉ and ⋯ to top-right corner of result block (no scrolling needed) | ✅ |
 | 3.25 | Auto-open when done: viewer opens automatically after generation completes | ✅ |
+| 3.26 | Markdown table rendering (sidepanel + viewer) | ✅ |
+| 3.27 | Viewer theme: follows browser/extension light-dark setting | ✅ |
 
 **Phase 3.7 total: ~3 h**
+
+---
+
+## Phase 3.8 — Copy improvements & documentation cleanup
+> Goal: polish copy UX and clean up README from opinionated model claims
+
+| # | Task | Status |
+|---|------|--------|
+| 3.28 | Copy button appends `Source: <URL>` to clipboard (sidepanel) | ✅ |
+| 3.29 | Word count displayed alongside char count in viewer | ✅ |
+| 3.30 | Viewer Copy also appends Source URL (URL passed via viewerContent) | ✅ |
+| 3.31 | README: removed model examples table, generalized all specific model mentions | ✅ |
+
+**Phase 3.8 total: ~30 min**
 
 ---
 
@@ -163,6 +179,7 @@ Level 3: Meta tags (last resort)
 | Phase 3 — Extras | ✅ | ~2.5 h |
 | Phase 3.5 — Settings & Prompt | ✅ | ~30 min |
 | Phase 3.6 — Quality & reliability | ✅ | ~2 h |
-| Phase 3.7 — UI improvements | ✅ | ~2.5 h |
+| Phase 3.7 — UI improvements | ✅ | ~3 h |
+| Phase 3.8 — Copy & docs cleanup | ✅ | ~30 min |
 | Phase 5 — Content extraction | ⬜ | — |
-| **Total** | | **~9.5 h** |
+| **Total** | | **~10 h** |
