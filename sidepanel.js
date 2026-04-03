@@ -899,7 +899,14 @@ function openViewer() {
     }
   }, () => {
     if (viewerMode === 'popup') {
-      chrome.windows.create({ url: chrome.runtime.getURL('viewer.html'), type: 'popup', width: 820, height: 680 });
+      chrome.windows.create({
+        url: chrome.runtime.getURL('viewer.html'),
+        type: 'popup',
+        width: 820,
+        height: 680,
+        left: Math.round(screen.width * 0.75 - 820 / 2),
+        top: Math.round((screen.height - 680) / 2)
+      });
     } else {
       chrome.tabs.create({ url: chrome.runtime.getURL('viewer.html') });
     }
