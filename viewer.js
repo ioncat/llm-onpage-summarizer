@@ -6,14 +6,31 @@ function parseMarkdown(md) {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`([^`]+)`/g, '<code>$1</code>');
 
+  const isSepRow = row => row.split('|').slice(1,-1).every(c => /^[\s\-:]+$/.test(c));
+  const parseRow = row => row.split('|').slice(1,-1).map(c => inline(escape(c.trim())));
+  const flushTable = rows => {
+    if (!rows.length) return '';
+    let out = '<table>', headerDone = false;
+    for (const row of rows) {
+      if (isSepRow(row)) { out += '</thead><tbody>'; headerDone = true; continue; }
+      const tag = headerDone ? 'td' : 'th';
+      const cells = parseRow(row).map(c => `<${tag}>${c}</${tag}>`).join('');
+      if (!headerDone) out += `<thead><tr>${cells}</tr>`;
+      else out += `<tr>${cells}</tr>`;
+    }
+    if (!headerDone) out += '</thead><tbody>';
+    return out + '</tbody></table>';
+  };
+
   const lines = md.split('\n');
   let html = '';
-  let inUl = false, inOl = false, inPre = false, inBlockquote = false;
+  let inUl = false, inOl = false, inPre = false, inBlockquote = false, tableRows = [];
 
   const closeAll = () => {
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
     if (inBlockquote) { html += '</blockquote>'; inBlockquote = false; }
+    if (tableRows.length) { html += flushTable(tableRows); tableRows = []; }
   };
 
   for (let i = 0; i < lines.length; i++) {
@@ -25,6 +42,13 @@ function parseMarkdown(md) {
       else html += escape(raw) + '\n';
       continue;
     }
+    if (/^\|/.test(line)) {
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      if (inBlockquote) { html += '</blockquote>'; inBlockquote = false; }
+      tableRows.push(raw); continue;
+    }
+    if (tableRows.length) { html += flushTable(tableRows); tableRows = []; }
     if (line.startsWith('```')) {
       closeAll();
       const lang = line.slice(3).trim();
@@ -61,6 +85,10 @@ function parseMarkdown(md) {
   if (inPre) html += '</code></pre>';
   return html;
 }
+
+chrome.storage.local.get('theme', ({ theme }) => {
+  if (theme) document.documentElement.setAttribute('data-theme', theme);
+});
 
 chrome.storage.session.get('viewerContent', ({ viewerContent }) => {
   const titleEl = document.getElementById('title');

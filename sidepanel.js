@@ -204,28 +204,54 @@ function parseMarkdown(md) {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>');
 
+  const isSepRow = row => row.split('|').slice(1,-1).every(c => /^[\s\-:]+$/.test(c));
+  const parseRow = row => row.split('|').slice(1,-1).map(c => inline(escape(c.trim())));
+
+  const flushTable = rows => {
+    if (!rows.length) return '';
+    let out = '<table>', headerDone = false;
+    for (const row of rows) {
+      if (isSepRow(row)) { out += '</thead><tbody>'; headerDone = true; continue; }
+      const tag = headerDone ? 'td' : 'th';
+      const cells = parseRow(row).map(c => `<${tag}>${c}</${tag}>`).join('');
+      if (!headerDone) out += `<thead><tr>${cells}</tr>`;
+      else out += `<tr>${cells}</tr>`;
+    }
+    if (!headerDone) out += '</thead><tbody>';
+    return out + '</tbody></table>';
+  };
+
   const lines = md.split('\n');
-  let html = '', inUl = false, inOl = false;
+  let html = '', inUl = false, inOl = false, tableRows = [];
 
   const closeLists = () => {
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
   };
+  const closeTable = () => {
+    if (tableRows.length) { html += flushTable(tableRows); tableRows = []; }
+  };
+  const closeAll = () => { closeLists(); closeTable(); };
 
   for (const raw of lines) {
+    if (/^\|/.test(raw)) { closeLists(); tableRows.push(raw); continue; }
+    closeTable();
+
     const line = inline(escape(raw));
 
-    if (/^### /.test(line))       { closeLists(); html += `<h3>${line.slice(4)}</h3>`; continue; }
-    if (/^## /.test(line))        { closeLists(); html += `<h2>${line.slice(3)}</h2>`; continue; }
-    if (/^# /.test(line))         { closeLists(); html += `<h1>${line.slice(2)}</h1>`; continue; }
-    if (/^---+$/.test(raw.trim())) { closeLists(); html += '<hr>'; continue; }
+    if (/^### /.test(raw))        { closeAll(); html += `<h3>${inline(escape(raw.slice(4)))}</h3>`; continue; }
+    if (/^## /.test(raw))         { closeAll(); html += `<h2>${inline(escape(raw.slice(3)))}</h2>`; continue; }
+    if (/^# /.test(raw))          { closeAll(); html += `<h1>${inline(escape(raw.slice(2)))}</h1>`; continue; }
+    if (/^---+$/.test(raw.trim())) { closeAll(); html += '<hr>'; continue; }
 
     if (/^[-*•] /.test(raw)) {
+      closeTable();
       if (!inUl) { closeLists(); html += '<ul>'; inUl = true; }
       html += `<li>${inline(escape(raw.replace(/^[-*•] /, '')))}</li>`;
       continue;
     }
     if (/^\d+\. /.test(raw)) {
+      closeTable();
       if (!inOl) { closeLists(); html += '<ol>'; inOl = true; }
       html += `<li>${inline(escape(raw.replace(/^\d+\. /, '')))}</li>`;
       continue;
@@ -236,7 +262,7 @@ function parseMarkdown(md) {
     html += `<p>${line}</p>`;
   }
 
-  closeLists();
+  closeAll();
   return html;
 }
 
