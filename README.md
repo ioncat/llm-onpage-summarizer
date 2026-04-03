@@ -70,7 +70,7 @@ Stop wasting minutes on fluff. Start with the summary.
 
 ## The prompt is everything
 
-> **90% of result quality comes from the prompt. Model choice is secondary.**
+> **Result quality depends on two things equally: the model you choose and the prompt you write. Neither alone is enough.**
 
 The extension ships with one default tab — **Summarize**. Add more tabs via the **+** button, name them however you like, write a completely custom prompt for each.
 
