@@ -52,6 +52,7 @@ let pendingSelectionText = null;
 let modelList = [];
 let modelMeta = {};
 let currentResultText = '';
+let currentChatMessages = [];
 let viewerMode = 'popup';
 let viewerAutoOpen = false;
 
@@ -844,6 +845,11 @@ async function run() {
     }
 
     if (fullText) {
+      currentChatMessages = [
+        { role: 'system', content: getSystemPrompt() },
+        { role: 'user',   content: prompt },
+        { role: 'assistant', content: fullText },
+      ];
       saveToHistory(fullText);
       if (viewerAutoOpen) openViewer();
     }
@@ -897,7 +903,10 @@ function openViewer() {
         text: currentResultText,
         markdown: markdownToggle.checked,
         title: slot?.name || 'Result',
-        url: tab?.url || ''
+        url: tab?.url || '',
+        chatMessages: currentChatMessages,
+        model: modelSelect.value || DEFAULT_MODEL,
+        ollamaUrl: urlInput.value.trim() || DEFAULT_OLLAMA_URL,
       }
     }, () => {
       if (viewerMode === 'popup') {

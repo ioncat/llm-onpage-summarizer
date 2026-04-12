@@ -105,6 +105,22 @@
 
 ---
 
+## Phase 3.9 — Follow-up chat in Viewer
+> Goal: allow multi-turn conversation about page content directly in the Viewer window
+
+| # | Task | Status |
+|---|------|--------|
+| 3.32 | Pass full chat context (messages, model, ollamaUrl) from sidepanel to Viewer via viewerContent | ✅ |
+| 3.33 | Chat UI in Viewer: message thread + fixed ChatGPT-style rounded input bar at bottom | ✅ |
+| 3.34 | Ollama streaming for follow-up messages in viewer.js | ✅ |
+| 3.35 | User messages styled with indent, assistant messages as standard content | ✅ |
+| 3.36 | Rerun button (↻) — regenerate last model response | ✅ |
+| 3.37 | Chat hint above input bar, disappears after first message | ✅ |
+
+**Phase 3.9 total: ~1 h**
+
+---
+
 ## Phase 4 — Multi-provider support (planned)
 > Goal: support cloud and alternative LLM providers alongside Ollama
 
@@ -181,5 +197,6 @@ Level 3: Meta tags (last resort)
 | Phase 3.6 — Quality & reliability | ✅ | ~2 h |
 | Phase 3.7 — UI improvements | ✅ | ~3 h |
 | Phase 3.8 — Copy & docs cleanup | ✅ | ~30 min |
+| Phase 3.9 — Follow-up chat in Viewer | ✅ | ~1 h |
 | Phase 5 — Content extraction | ⬜ | — |
-| **Total** | | **~10 h** |
+| **Total** | | **~11 h** |

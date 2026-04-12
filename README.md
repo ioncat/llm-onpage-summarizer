@@ -53,8 +53,9 @@ Stop wasting minutes on fluff. Start with the summary.
 | **Stop** | Cancel an in-progress generation |
 | **Clear** | Remove the current result |
 | **Copy** | Copy result to clipboard (bottom of result area) |
-| **⧉** | Open result in a full-view reader — located in the top-right corner of the result area |
+| **⧉** | Open result in a full-view reader with **follow-up chat** — ask the model to expand on any detail without leaving the viewer |
 | **⋯** | Choose how the viewer opens: **Open in popup window** or **Open in new tab**. Toggle **Auto-open when done** to have the viewer open automatically after every generation — no click needed |
+| **↻** (in viewer) | Rerun — regenerate the last model response |
 | ⚙ Settings | Configure model, max text length, Ollama URL, prompt template, Markdown toggle |
 | ⏱ History | Browse last 8 results |
 

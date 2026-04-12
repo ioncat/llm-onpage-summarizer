@@ -95,25 +95,43 @@ chrome.storage.session.get('viewerContent', ({ viewerContent }) => {
   const contentEl = document.getElementById('content');
   const charCountEl = document.getElementById('char-count');
   const btnCopy = document.getElementById('btn-copy');
+  const chatThread = document.getElementById('chat-thread');
+  const chatInputBar = document.getElementById('chat-input-bar');
+  const chatInput = document.getElementById('chat-input');
+  const btnSend = document.getElementById('btn-send');
+  const chatHint = document.getElementById('chat-hint');
 
   if (!viewerContent?.text) {
     contentEl.innerHTML = '<div class="empty">No content to display.</div>';
     return;
   }
 
-  const { text, markdown, title, url } = viewerContent;
+  const btnRerun = document.getElementById('btn-rerun');
+
+  const { text, markdown, title, url, chatMessages, model, ollamaUrl } = viewerContent;
+  let messages = chatMessages?.length ? [...chatMessages] : [];
+  let isGenerating = false;
+  let lastResponseEl = null;
 
   titleEl.textContent = title || 'Result';
   document.title = `${title || 'Result'} — LLM Summarizer`;
   charCountEl.textContent = `${text.length} chars · ${text.trim().split(/\s+/).filter(Boolean).length} words`;
 
+  // Render initial summary
   if (markdown) {
     contentEl.innerHTML = parseMarkdown(text);
     contentEl.style.whiteSpace = 'normal';
   } else {
     contentEl.textContent = text;
   }
+  lastResponseEl = contentEl;
 
+  // Show chat input if we have context for follow-ups
+  if (messages.length && model && ollamaUrl) {
+    chatInputBar.hidden = false;
+  }
+
+  // Copy — only initial summary + source
   btnCopy.addEventListener('click', () => {
     const source = url ? `\n\nSource: ${url}` : '';
     navigator.clipboard.writeText(text + source).then(() => {
@@ -121,4 +139,211 @@ chrome.storage.session.get('viewerContent', ({ viewerContent }) => {
       setTimeout(() => { btnCopy.textContent = 'Copy'; }, 1500);
     });
   });
+
+  // --- Chat logic ---
+
+  function renderMarkdownOrText(container, content) {
+    if (markdown) {
+      container.innerHTML = parseMarkdown(content);
+      container.style.whiteSpace = 'normal';
+    } else {
+      container.textContent = content;
+    }
+  }
+
+  function appendUserMessage(text) {
+    const divider = document.createElement('hr');
+    divider.className = 'chat-divider';
+    chatThread.appendChild(divider);
+
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg chat-msg--user';
+    msg.textContent = text;
+    chatThread.appendChild(msg);
+  }
+
+  function appendAssistantMessage() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'chat-msg chat-msg--assistant';
+    const inner = document.createElement('div');
+    inner.className = 'content';
+    wrapper.appendChild(inner);
+    chatThread.appendChild(wrapper);
+    return inner;
+  }
+
+  function scrollToBottom() {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
+  function autoResize() {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  }
+
+  chatInput.addEventListener('input', autoResize);
+
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendFollowUp();
+    }
+  });
+
+  btnSend.addEventListener('click', sendFollowUp);
+
+  async function sendFollowUp() {
+    const question = chatInput.value.trim();
+    if (!question || isGenerating) return;
+
+    isGenerating = true;
+    btnSend.disabled = true;
+    chatInput.value = '';
+    autoResize();
+
+    // Hide hint after first message
+    if (chatHint) chatHint.hidden = true;
+
+    // Add user message to UI and messages array
+    appendUserMessage(question);
+    messages.push({ role: 'user', content: question });
+    scrollToBottom();
+
+    // Create assistant response container
+    const responseEl = appendAssistantMessage();
+    let fullResponse = '';
+
+    try {
+      const response = await fetch(`${ollamaUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, stream: true, messages }),
+      });
+
+      if (!response.ok) {
+        const msg = await response.text().catch(() => response.statusText);
+        throw new Error(`Ollama error ${response.status}: ${msg}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      const processLine = (line) => {
+        if (!line.trim()) return;
+        try {
+          const json = JSON.parse(line);
+          const token = json.message?.content ?? json.response ?? '';
+          if (token) {
+            fullResponse += token;
+            renderMarkdownOrText(responseEl, fullResponse);
+            scrollToBottom();
+          }
+        } catch {}
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (buffer.trim()) processLine(buffer);
+          break;
+        }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        lines.forEach(processLine);
+      }
+
+      if (fullResponse) {
+        messages.push({ role: 'assistant', content: fullResponse });
+        lastResponseEl = responseEl;
+      }
+
+    } catch (err) {
+      responseEl.textContent = `Error: ${err.message}`;
+      responseEl.style.color = 'var(--text-muted)';
+    } finally {
+      isGenerating = false;
+      btnSend.disabled = false;
+      btnRerun.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  // --- Rerun logic ---
+
+  async function rerunLast() {
+    if (isGenerating || !messages.length || !model || !ollamaUrl) return;
+
+    // Remove last assistant message to regenerate it
+    if (messages[messages.length - 1]?.role === 'assistant') {
+      messages.pop();
+    }
+    if (!messages.length) return;
+
+    isGenerating = true;
+    btnSend.disabled = true;
+    btnRerun.disabled = true;
+
+    // Clear the last response element and re-stream into it
+    lastResponseEl.innerHTML = '';
+    lastResponseEl.style.color = '';
+    let fullResponse = '';
+
+    try {
+      const response = await fetch(`${ollamaUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, stream: true, messages }),
+      });
+
+      if (!response.ok) {
+        const msg = await response.text().catch(() => response.statusText);
+        throw new Error(`Ollama error ${response.status}: ${msg}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      const processLine = (line) => {
+        if (!line.trim()) return;
+        try {
+          const json = JSON.parse(line);
+          const token = json.message?.content ?? json.response ?? '';
+          if (token) {
+            fullResponse += token;
+            renderMarkdownOrText(lastResponseEl, fullResponse);
+            scrollToBottom();
+          }
+        } catch {}
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (buffer.trim()) processLine(buffer);
+          break;
+        }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        lines.forEach(processLine);
+      }
+
+      if (fullResponse) {
+        messages.push({ role: 'assistant', content: fullResponse });
+      }
+
+    } catch (err) {
+      lastResponseEl.textContent = `Error: ${err.message}`;
+      lastResponseEl.style.color = 'var(--text-muted)';
+    } finally {
+      isGenerating = false;
+      btnSend.disabled = false;
+      btnRerun.disabled = false;
+    }
+  }
+
+  btnRerun.addEventListener('click', rerunLast);
 });

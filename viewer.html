@@ -162,6 +162,124 @@
       text-align: center;
       margin-top: 80px;
     }
+
+    /* Chat thread */
+    #chat-thread {
+      padding-bottom: 80px;
+    }
+
+    .chat-msg {
+      margin: 16px 0;
+    }
+
+    .chat-msg--user {
+      margin-left: 40px;
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .chat-msg--assistant {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text);
+    }
+
+    .chat-msg--assistant .content {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .chat-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    /* Fixed input bar */
+    .chat-input-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 20px;
+      background: var(--bg);
+      border-top: none;
+    }
+
+    .chat-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .chat-input-wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 6px 6px 6px 18px;
+      transition: border-color 0.15s;
+    }
+
+    .chat-input-wrap:focus-within {
+      border-color: var(--accent);
+    }
+
+    #chat-input {
+      flex: 1;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 6px 0;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      resize: none;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    #chat-input:focus {
+      outline: none;
+    }
+
+    #chat-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    #btn-send {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    #btn-send:hover {
+      opacity: 0.85;
+    }
+
+    #btn-send:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -170,11 +288,21 @@
       <h1 id="title">Result</h1>
       <div class="actions">
         <span class="badge" id="char-count"></span>
+        <button id="btn-rerun" title="Rerun">↻</button>
         <button id="btn-copy">Copy</button>
         <button id="btn-print" onclick="window.print()">Print</button>
       </div>
     </header>
-    <div id="content" class="content"></div>
+    <div id="chat-thread">
+      <div id="content" class="content"></div>
+    </div>
+  </div>
+  <div class="chat-input-bar" id="chat-input-bar" hidden>
+    <div class="chat-hint" id="chat-hint">Continue the conversation — ask about details</div>
+    <div class="chat-input-wrap">
+      <textarea id="chat-input" rows="1" placeholder="Ask a follow-up…"></textarea>
+      <button id="btn-send" title="Send">➤</button>
+    </div>
   </div>
   <script src="viewer.js"></script>
 </body>
