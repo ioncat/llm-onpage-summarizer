@@ -1,6 +1,6 @@
 # llm-onpage-summarizer
 
-A Chrome extension that summarizes the current web page using an **LLM via [Ollama](https://ollama.com)**. No API keys required — Ollama supports both local and cloud-backed models, and you decide where your data goes.
+A Chrome extension that summarizes web pages, lets you ask follow-up questions about the content — all in one window, powered by **[Ollama](https://ollama.com)**. No API keys required — Ollama supports both local and cloud-backed models, and you decide where your data goes.
 
 ## Why bother?
 
