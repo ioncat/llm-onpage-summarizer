@@ -1,6 +1,10 @@
 # llm-onpage-summarizer
 
-A Chrome extension that summarizes web pages, lets you ask follow-up questions about the content — all in one window, powered by **[Ollama](https://ollama.com)**. No API keys required — Ollama supports both local and cloud-backed models, and you decide where your data goes.
+A Chrome extension powered by **[Ollama](https://ollama.com)** that helps you process web content faster:
+
+- **Summarize** any page in seconds
+- **Ask follow-up questions** about the content — all in one window
+- **No API keys** — Ollama supports both local and cloud-backed models, and you decide where your data goes
 
 ## Why bother?
 
@@ -40,7 +44,7 @@ Stop wasting minutes on fluff. Start with the summary.
 1. Clone or download this repo
 2. Open Chrome → `chrome://extensions`
 3. Enable **Developer mode** (top right)
-4. Click **Load unpacked** → select the `llm-onpage-summarizer` folder
+4. Click **Load unpacked** → select the `src` folder inside the repo
 5. Click the extension icon in the toolbar to open the side panel
 
 ## Usage
