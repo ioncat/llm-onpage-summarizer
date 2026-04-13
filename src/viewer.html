@@ -74,6 +74,12 @@
       border-radius: 4px;
     }
 
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
     .actions {
       display: flex;
       gap: 8px;
@@ -285,7 +291,10 @@
 <body>
   <div class="container">
     <header>
-      <h1 id="title">Result</h1>
+      <div>
+        <h1 id="title">Result</h1>
+        <div class="subtitle" id="subtitle"></div>
+      </div>
       <div class="actions">
         <span class="badge" id="char-count"></span>
         <button id="btn-rerun" title="Rerun">↻</button>

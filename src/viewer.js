@@ -108,14 +108,20 @@ chrome.storage.session.get('viewerContent', ({ viewerContent }) => {
 
   const btnRerun = document.getElementById('btn-rerun');
 
-  const { text, markdown, title, url, chatMessages, model, ollamaUrl } = viewerContent;
+  const subtitleEl = document.getElementById('subtitle');
+
+  const { text, markdown, title, url, chatMessages, model, ollamaUrl, genTime } = viewerContent;
   let messages = chatMessages?.length ? [...chatMessages] : [];
   let isGenerating = false;
   let lastResponseEl = null;
 
-  titleEl.textContent = title || 'Result';
-  document.title = `${title || 'Result'} — LLM Summarizer`;
-  charCountEl.textContent = `${text.length} chars · ${text.trim().split(/\s+/).filter(Boolean).length} words`;
+  titleEl.textContent = 'Summary';
+  document.title = `${title || 'Summary'} — LLM Summarizer`;
+  if (model) subtitleEl.textContent = `by ${model}`;
+
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const timePart = genTime ? ` · ${genTime}s` : '';
+  charCountEl.textContent = `${text.length} chars · ${words} words${timePart}`;
 
   // Render initial summary
   if (markdown) {

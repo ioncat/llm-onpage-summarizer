@@ -176,13 +176,33 @@ Level 3: Meta tags (last resort)
 
 ---
 
+## Phase 6 — Model Benchmark (planned)
+> Goal: automated speed comparison across selected models using the same prompt
+> Estimate: ~2 h
+
+| # | Task | Status |
+|---|------|--------|
+| 6.1 | Checkbox UI for selecting which models to benchmark | ⬜ |
+| 6.2 | "Benchmark" button + sequential execution loop (one model at a time) | ⬜ |
+| 6.3 | Metrics collection: chars, words, time, chars/sec per model | ⬜ |
+| 6.4 | Progress indicator during run (model 2 of 5…) | ⬜ |
+| 6.5 | Results table in Viewer, sorted by speed (chars/sec) | ⬜ |
+
+**Design decisions:**
+- Metrics only, no response text stored
+- Sequential execution (fair resource allocation per model)
+- No automatic "winner" label — table sorted by speed, user decides
+- Same prompt + page text for all models
+
+---
+
 ## Other improvements (planned)
 
 | # | Idea | Priority |
 |---|------|----------|
-| 6.1 | LM Studio / OpenAI-compatible local provider support (`/v1/models`, `/v1/chat/completions`, SSE streaming) | medium |
-| 6.2 | Provider abstraction layer — clean separation of Ollama vs OpenAI-compatible API logic | medium |
-| 6.3 | Editable system prompt in settings | medium |
+| 7.1 | LM Studio / OpenAI-compatible local provider support (`/v1/models`, `/v1/chat/completions`, SSE streaming) | medium |
+| 7.2 | Provider abstraction layer — clean separation of Ollama vs OpenAI-compatible API logic | medium |
+| 7.3 | Editable system prompt in settings | medium |
 
 ---
 

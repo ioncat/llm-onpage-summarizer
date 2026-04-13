@@ -53,6 +53,7 @@ let modelList = [];
 let modelMeta = {};
 let currentResultText = '';
 let currentChatMessages = [];
+let currentGenTime = 0;
 let viewerMode = 'popup';
 let viewerAutoOpen = false;
 
@@ -787,6 +788,7 @@ async function run() {
   const prompt = buildPrompt(pageText);
   abortController = new AbortController();
   let fullText = '';
+  const genStartTime = Date.now();
 
   try {
     const response = await fetch(`${baseUrl}/api/chat`, {
@@ -845,6 +847,7 @@ async function run() {
     }
 
     if (fullText) {
+      currentGenTime = ((Date.now() - genStartTime) / 1000).toFixed(1);
       currentChatMessages = [
         { role: 'system', content: getSystemPrompt() },
         { role: 'user',   content: prompt },
@@ -907,6 +910,7 @@ function openViewer() {
         chatMessages: currentChatMessages,
         model: modelSelect.value || DEFAULT_MODEL,
         ollamaUrl: urlInput.value.trim() || DEFAULT_OLLAMA_URL,
+        genTime: currentGenTime,
       }
     }, () => {
       if (viewerMode === 'popup') {
