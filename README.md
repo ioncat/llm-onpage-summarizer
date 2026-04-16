@@ -23,25 +23,36 @@ Stop wasting minutes on fluff. Start with the summary.
 
 ```mermaid
 graph TD
-    A([👤 User Action]) -->|Click or Right-click| B["📖 Open Side Panel"]
-    B --> C["🔍 Extract Page Text"]
-    C --> D["⚙️ Select Prompt & Run"]
-    D --> E["📤 Stream from Ollama"]
-    E --> F["📝 Display Result"]
-    F --> G{Expand<br/>to viewer?}
-    G -->|Yes| H["👁️ Full-view Chat"]
-    G -->|No| I([✅ Done])
-    H --> I
-    
-    style A fill:#1e88e5,color:#fff
-    style B fill:#43a047,color:#fff
-    style C fill:#fb8c00,color:#fff
-    style D fill:#e53935,color:#fff
-    style E fill:#8e24aa,color:#fff
-    style F fill:#fdd835,color:#000
-    style G fill:#f57c00,color:#fff
-    style H fill:#00897b,color:#fff
-    style I fill:#c8e6c9
+    subgraph UA["👤 User Actions"]
+        UA1["🖱️ Click/<br/>Right-click"] --> UA2["📖 Open<br/>Panel"] --> UA3["🔍 Extract<br/>Text"] --> UA4["⚙️ Select<br/>& Run"]
+    end
+
+    subgraph OL["🤖 Ollama Processing"]
+        OL1["📤 Send"] --> OL2["⚙️ Process"] --> OL3["📨 Stream"]
+    end
+
+    subgraph RES["📝 Results & Viewer"]
+        RES1["📊 Display"] --> RES2{Expand?} --> RES3["👁️ Chat"] --> RES4([✅ Done])
+        RES2 -->|No| RES4
+    end
+
+    UA --> OL
+    OL --> RES
+
+    style UA fill:#1e88e5,color:#fff,stroke:#0d47a1,stroke-width:2px
+    style OL fill:#8e24aa,color:#fff,stroke:#4a148c,stroke-width:2px
+    style RES fill:#00897b,color:#fff,stroke:#004d40,stroke-width:2px
+    style UA1 fill:#42a5f5,color:#fff
+    style UA2 fill:#42a5f5,color:#fff
+    style UA3 fill:#42a5f5,color:#fff
+    style UA4 fill:#42a5f5,color:#fff
+    style OL1 fill:#ba68c8,color:#fff
+    style OL2 fill:#ba68c8,color:#fff
+    style OL3 fill:#ba68c8,color:#fff
+    style RES1 fill:#26a69a,color:#fff
+    style RES2 fill:#f57c00,color:#fff
+    style RES3 fill:#26a69a,color:#fff
+    style RES4 fill:#c8e6c9,color:#000
 ```
 
 ###
