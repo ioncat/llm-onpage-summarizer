@@ -32,7 +32,7 @@ graph TD
     end
 
     subgraph RES["📝 Results & Viewer"]
-        RES1["📊 Display"] --> RES2{Expand?} --> RES3["🗨️ Chat"] --> RES4([✅ Done])
+        RES1["📄 Summary Ready"] --> RES2{Go deeper?} --> RES3["🗨️ Follow-up Chat"] --> RES4([✅ Done])
         RES2 -->|No| RES4
     end
 
