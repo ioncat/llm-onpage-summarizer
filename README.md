@@ -22,14 +22,14 @@ Stop wasting minutes on fluff. Start with the summary.
 ## How it works
 
 ```mermaid
-graph LR
-    A([👤 User<br/>Action]) -->|Click or<br/>Right-click| B["📖 Open<br/>Side Panel"]
-    B --> C["🔍 Extract<br/>Page Text"]
-    C --> D["⚙️ Select<br/>Prompt & Run"]
-    D --> E["📤 Stream from<br/>Ollama"]
-    E --> F["📝 Display<br/>Result"]
+graph TD
+    A([👤 User Action]) -->|Click or Right-click| B["📖 Open Side Panel"]
+    B --> C["🔍 Extract Page Text"]
+    C --> D["⚙️ Select Prompt & Run"]
+    D --> E["📤 Stream from Ollama"]
+    E --> F["📝 Display Result"]
     F --> G{Expand<br/>to viewer?}
-    G -->|Yes| H["👁️ Full-view<br/>Chat"]
+    G -->|Yes| H["👁️ Full-view Chat"]
     G -->|No| I([✅ Done])
     H --> I
     
@@ -39,6 +39,7 @@ graph LR
     style D fill:#e53935,color:#fff
     style E fill:#8e24aa,color:#fff
     style F fill:#fdd835,color:#000
+    style G fill:#f57c00,color:#fff
     style H fill:#00897b,color:#fff
     style I fill:#c8e6c9
 ```
