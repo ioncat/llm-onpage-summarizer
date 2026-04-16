@@ -45,7 +45,6 @@ graph TD
     style UA1 fill:#42a5f5,color:#fff
     style UA2 fill:#42a5f5,color:#fff
     style UA3 fill:#42a5f5,color:#fff
-    style UA4 fill:#42a5f5,color:#fff
     style OL1 fill:#ba68c8,color:#fff
     style OL2 fill:#ba68c8,color:#fff
     style OL3 fill:#ba68c8,color:#fff
@@ -54,8 +53,6 @@ graph TD
     style RES3 fill:#26a69a,color:#fff
     style RES4 fill:#c8e6c9,color:#000
 ```
-
-###
 
 **Full page:**
 1. Click the extension icon — a side panel opens
