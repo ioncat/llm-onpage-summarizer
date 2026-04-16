@@ -24,11 +24,11 @@ Stop wasting minutes on fluff. Start with the summary.
 ```mermaid
 graph TD
     subgraph UA["👤 User Actions"]
-        UA1["🖱️ Click/<br/>Right-click"] --> UA2["📖 Open<br/>Panel"] --> UA3["🔍 Extract<br/>Text"] --> UA4["⚙️ Select<br/>& Run"]
+        UA1["🖱️ Click/<br/>Right-click"] --> UA2["📖 Open<br/>Panel"] --> UA3["⚙️ Select<br/>Model & Run"]
     end
 
-    subgraph OL["🤖 Ollama Processing"]
-        OL1["📤 Send"] --> OL2["⚙️ Process"] --> OL3["📨 Stream"]
+    subgraph OL["🔄 Processing"]
+        OL1["🔍 Extract<br/>Page Text"] --> OL2["📤 Send to<br/>Ollama"] --> OL3["📨 Stream<br/>Response"]
     end
 
     subgraph RES["📝 Results & Viewer"]
