@@ -39,19 +39,19 @@ graph TD
     UA --> OL
     OL --> RES
 
-    style UA fill:#1e88e5,color:#fff,stroke:#0d47a1,stroke-width:2px
-    style OL fill:#8e24aa,color:#fff,stroke:#4a148c,stroke-width:2px
-    style RES fill:#00897b,color:#fff,stroke:#004d40,stroke-width:2px
-    style UA1 fill:#42a5f5,color:#fff
-    style UA2 fill:#42a5f5,color:#fff
-    style UA3 fill:#42a5f5,color:#fff
-    style OL1 fill:#ba68c8,color:#fff
-    style OL2 fill:#ba68c8,color:#fff
-    style OL3 fill:#ba68c8,color:#fff
-    style RES1 fill:#26a69a,color:#fff
-    style RES2 fill:#f57c00,color:#fff
-    style RES3 fill:#26a69a,color:#fff
-    style RES4 fill:#c8e6c9,color:#000
+    style UA fill:#4a6fa5,color:#fff,stroke:#344e73,stroke-width:2px
+    style OL fill:#6b5a7e,color:#fff,stroke:#4a3d5c,stroke-width:2px
+    style RES fill:#3d7a6e,color:#fff,stroke:#2a5549,stroke-width:2px
+    style UA1 fill:#7a9cbf,color:#fff
+    style UA2 fill:#7a9cbf,color:#fff
+    style UA3 fill:#7a9cbf,color:#fff
+    style OL1 fill:#9b89b0,color:#fff
+    style OL2 fill:#9b89b0,color:#fff
+    style OL3 fill:#9b89b0,color:#fff
+    style RES1 fill:#5a9e92,color:#fff
+    style RES2 fill:#b07840,color:#fff
+    style RES3 fill:#5a9e92,color:#fff
+    style RES4 fill:#d4e8d4,color:#333
 ```
 
 **Full page:**
