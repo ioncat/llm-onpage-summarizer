@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Диаграммы - LLM Onpage Summarizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            font-size: 2.5em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .diagram-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .diagram-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+
+        .diagram-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .diagram-meta {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .mermaid svg {
+            min-height: 400px;
+        }
+
+        .number-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+    </style>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Mermaid Диаграммы<br/><small style="font-size: 0.6em;">LLM Onpage Summarizer</small></h1>
+
+        <!-- ДИАГРАММА 1 -->
+        <div class="diagram-section">
+            <h2><span class="number-badge">1</span>Архитектура — Пользовательский уровень (простая)</h2>
+            <p class="diagram-meta">Что видит пользователь: основные компоненты и их взаимодействие</p>
+            <div class="mermaid">
+graph TB
+    A["🖱️ User Action<br/>(Click icon or Right-click)"]
+    B["📋 Side Panel<br/>(Summarizer opens)"]
+    C["🔍 Extract Text<br/>(from page)"]
+    D["⚙️ Select Mode<br/>(Summarize/Custom)"]
+    E["🤖 Ollama<br/>(local LLM)"]
+    F["📝 Result<br/>(display & copy)"]
+    G["👁️ Viewer<br/>(full-screen chat)"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+
+    style A fill:#e1f5ff
+    style B fill:#fff3e0
+    style C fill:#f3e5f5
+    style E fill:#c8e6c9
+    style F fill:#ffe0b2
+    style G fill:#f1f8e9
+            </div>
+        </div>
+
+        <!-- ДИАГРАММА 2 -->
+        <div class="diagram-section">
+            <h2><span class="number-badge">2</span>Архитектура — Технический уровень (подробная)</h2>
+            <p class="diagram-meta">Технические компоненты: JS файлы, Chrome APIs, storage, Ollama интеграция</p>
+            <div class="mermaid">
+graph TB
+    A["User Action"]
+    B["background.js<br/>(service worker)"]
+    C["chrome.sidePanel.open<br/>+ storage.session"]
+    D["sidepanel.js<br/>(main orchestrator)"]
+
+    E1["Readability.js<br/>(Level 1)"]
+    E2["DOM Traversal<br/>(Level 2)"]
+    E3["Meta Tags<br/>(Level 3)"]
+    E["Text Extraction<br/>(3-level fallback)"]
+
+    F["Prompt Selector<br/>(slot system)"]
+    G["chrome.storage.local<br/>(settings & history)"]
+
+    H["fetch() →<br/>Ollama /api/chat<br/>(NDJSON stream)"]
+    I["parseMarkdown()<br/>+ DOM update"]
+    J["Result UI<br/>(Copy/Clear/Expand)"]
+
+    K["chrome.storage.session<br/>(viewerContent)"]
+    L["viewer.js<br/>(popup/tab)"]
+    M["Follow-up Chat<br/>(multi-turn)"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E1 --> E
+    E2 --> E
+    E3 --> E
+    D --> F
+    F --> G
+    D --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+
+    style B fill:#e0e0e0
+    style D fill:#fff9c4
+    style E fill:#f3e5f5
+    style H fill:#c8e6c9
+    style L fill:#ffccbc
+            </div>
+        </div>
+
+        <!-- ДИАГРАММА 3 -->
+        <div class="diagram-section">
+            <h2><span class="number-badge">3</span>Последовательность — Пользовательский уровень (простая)</h2>
+            <p class="diagram-meta">Порядок действий: от клика пользователя до результата</p>
+            <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Extension
+    participant Ollama
+    participant Viewer
+
+    User->>Extension: Click icon or Right-click
+    activate Extension
+    Extension->>Extension: Extract page text
+    User->>Extension: Pick mode & click Run
+    Extension->>Ollama: Send text + prompt
+    activate Ollama
+    Ollama-->>Extension: Stream response token-by-token
+    deactivate Ollama
+    Extension->>Extension: Display result
+    User->>Extension: Click Expand (⧉)
+    Extension->>Viewer: Open in window/tab
+    activate Viewer
+    User->>Viewer: Ask follow-up questions
+    Viewer->>Ollama: Chat request
+    Ollama-->>Viewer: Response stream
+    Viewer->>Viewer: Display in chat
+    deactivate Viewer
+    deactivate Extension
+            </div>
+        </div>
+
+        <!-- ДИАГРАММА 4 -->
+        <div class="diagram-section">
+            <h2><span class="number-badge">4</span>Последовательность — Технический уровень (подробная)</h2>
+            <p class="diagram-meta">Детальная последовательность вызовов функций и передачи данных</p>
+            <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant background.js
+    participant sidepanel.js
+    participant Chrome Storage
+    participant Ollama
+    participant viewer.js
+
+    User->>background.js: Icon click / Right-click
+    activate background.js
+    background.js->>background.js: chrome.sidePanel.open()
+    background.js->>Chrome Storage: Set pendingSelection (if right-click)
+    background.js-->>background.js: Send chrome.runtime.sendMessage()
+    deactivate background.js
+
+    activate sidepanel.js
+    sidepanel.js->>Chrome Storage: Retrieve pendingSelection
+    sidepanel.js->>sidepanel.js: executeScript() → Readability/DOM/Meta
+    sidepanel.js->>Chrome Storage: Read settings (model, prompt, maxLength)
+
+    User->>sidepanel.js: Select tab & click Run
+    sidepanel.js->>sidepanel.js: Template {{text}} replacement
+
+    sidepanel.js->>Ollama: POST /api/chat (stream: true, NDJSON)
+    activate Ollama
+    Ollama-->>sidepanel.js: Chunk 1... Chunk 2... (streaming)
+    deactivate Ollama
+
+    sidepanel.js->>sidepanel.js: parseMarkdown() + DOM innerHTML update
+    sidepanel.js->>Chrome Storage: Save to history[]
+
+    User->>sidepanel.js: Click Expand (⧉)
+    sidepanel.js->>Chrome Storage: Set viewerContent {text, messages, model, url}
+    sidepanel.js->>sidepanel.js: chrome.windows.create() or chrome.tabs.create()
+    deactivate sidepanel.js
+
+    activate viewer.js
+    viewer.js->>Chrome Storage: Read viewerContent
+    viewer.js->>viewer.js: Render summary + display
+
+    User->>viewer.js: Type follow-up question & send
+    viewer.js->>viewer.js: Append to messages[] array
+    viewer.js->>Ollama: POST /api/chat (multi-turn, NDJSON)
+    activate Ollama
+    Ollama-->>viewer.js: Response stream
+    deactivate Ollama
+    viewer.js->>viewer.js: parseMarkdown() + append to chat DOM
+
+    User->>viewer.js: Click Rerun (↻)
+    viewer.js->>viewer.js: Pop last assistant message
+    viewer.js->>Ollama: Re-stream response
+    deactivate viewer.js
+            </div>
+        </div>
+
+        <!-- ДИАГРАММА 5 - ТЕКУЩАЯ (КОМПАКТНАЯ 3 БЛОКА) -->
+        <div class="diagram-section">
+            <h2><span class="number-badge">5</span>Pipeline — 3 основных блока (компактная для README)</h2>
+            <p class="diagram-meta">Основной поток: User → Ollama → Results, сжато в 3 блока горизонтально</p>
+            <div class="mermaid">
+graph TD
+    subgraph UA["👤 User Actions"]
+        UA1["🖱️ Click/<br/>Right-click"] --> UA2["📖 Open<br/>Panel"] --> UA3["🔍 Extract<br/>Text"] --> UA4["⚙️ Select<br/>& Run"]
+    end
+
+    subgraph OL["🤖 Ollama Processing"]
+        OL1["📤 Send"] --> OL2["⚙️ Process"] --> OL3["📨 Stream"]
+    end
+
+    subgraph RES["📝 Results & Viewer"]
+        RES1["📊 Display"] --> RES2{Expand?} --> RES3["👁️ Chat"] --> RES4([✅ Done])
+        RES2 -->|No| RES4
+    end
+
+    UA --> OL
+    OL --> RES
+
+    style UA fill:#1e88e5,color:#fff,stroke:#0d47a1,stroke-width:2px
+    style OL fill:#8e24aa,color:#fff,stroke:#4a148c,stroke-width:2px
+    style RES fill:#00897b,color:#fff,stroke:#004d40,stroke-width:2px
+    style UA1 fill:#42a5f5,color:#fff
+    style UA2 fill:#42a5f5,color:#fff
+    style UA3 fill:#42a5f5,color:#fff
+    style UA4 fill:#42a5f5,color:#fff
+    style OL1 fill:#ba68c8,color:#fff
+    style OL2 fill:#ba68c8,color:#fff
+    style OL3 fill:#ba68c8,color:#fff
+    style RES1 fill:#26a69a,color:#fff
+    style RES2 fill:#f57c00,color:#fff
+    style RES3 fill:#26a69a,color:#fff
+    style RES4 fill:#c8e6c9,color:#000
+            </div>
+        </div>
+
+        <div style="text-align: center; color: white; margin-top: 50px; padding: 20px;">
+            <p>Выбери нужный вариант и скажи номер! 🎯</p>
+        </div>
+    </div>
+</body>
+</html>
