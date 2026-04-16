@@ -21,6 +21,30 @@ Stop wasting minutes on fluff. Start with the summary.
 
 ## How it works
 
+```mermaid
+graph LR
+    A([👤 User<br/>Action]) -->|Click or<br/>Right-click| B["📖 Open<br/>Side Panel"]
+    B --> C["🔍 Extract<br/>Page Text"]
+    C --> D["⚙️ Select<br/>Prompt & Run"]
+    D --> E["📤 Stream from<br/>Ollama"]
+    E --> F["📝 Display<br/>Result"]
+    F --> G{Expand<br/>to viewer?}
+    G -->|Yes| H["👁️ Full-view<br/>Chat"]
+    G -->|No| I([✅ Done])
+    H --> I
+    
+    style A fill:#1e88e5,color:#fff
+    style B fill:#43a047,color:#fff
+    style C fill:#fb8c00,color:#fff
+    style D fill:#e53935,color:#fff
+    style E fill:#8e24aa,color:#fff
+    style F fill:#fdd835,color:#000
+    style H fill:#00897b,color:#fff
+    style I fill:#c8e6c9
+```
+
+###
+
 **Full page:**
 1. Click the extension icon — a side panel opens
 2. Select a mode: **Summarize** or any custom tab
