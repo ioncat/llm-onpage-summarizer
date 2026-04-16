@@ -14,6 +14,9 @@ CLAUDE.md
 .idea/
 .vscode/
 
+# Dev tools
+mermaid-preview.html
+
 # Logs
 *.log
 debug/
